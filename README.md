@@ -2,8 +2,6 @@
 
 This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command.
 
-## Features
-
 `phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a coding standard.
 
 ## Preview
