@@ -2,13 +2,13 @@
 
 This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command.
 
-## Preview
->![phpcbf preview](images/phpcbf-preview.gif)
->###### right mouse-click, in  context menu, select 'Format Document'. Here using the `WordPress-Core` standard.
-
 ## Features
 
 `phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a coding standard.
+
+## Preview
+>![phpcbf preview](images/phpcbf-preview.gif)
+>###### right mouse-click, in  context menu, select 'Format Document'. Here using the `WordPress-Core` standard.
 
 ## Requirements
 
@@ -53,22 +53,3 @@ This is the first release of my first vscode extension, you're warned :)
 ### 0.0.1
 
 Initial release
-
-
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
