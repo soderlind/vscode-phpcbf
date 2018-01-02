@@ -1,0 +1,79 @@
+{
+    "name": "vscode-phpcbf",
+    "displayName": "phpcbf",
+    "description": "PHP Code Beautifier and Fixer",
+    "version": "0.0.1",
+	"publisher": "persoderlind",
+	"homepage": "https://github.com/soderlind/vscode-phpcbf",
+    "icon": "logo.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/soderlind/vscode-phpcbf.git"
+	},
+    "engines": {
+        "vscode": "^1.19.0"
+    },
+    "categories": [
+		"Formatters",
+		"Linters",
+        "Other"
+    ],
+    "activationEvents": [
+    	"onLanguage:php"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "phpcbf-soderlind",
+				"title": "PHP Code Beautifier and Fixer: Fix this file",
+				"when": "!inOutput && editorFocus && editorLangId == php"
+            }
+		],
+		"configuration": {
+            "title": "PHP Code Beautifier and Fixer Configuration options",
+            "type": "object",
+            "properties": {
+                "phpcbf.executablePath": {
+                    "type": "string",
+                    "default": "phpcbf",
+                    "description": "Points to the phpcbf exectuable, eg: win: phpcbf.bat, other: phpcbf"
+				},
+				"phpcbf.standard": {
+                    "type": [
+						"string",
+						"null"
+					],
+                    "default": null,
+                    "description": "null, PSR1, PSR2, Symfony, WordPress etc. You can also point to a phpcs.xml rules file, eg: /file/path/phpcs.xml"
+				},
+				"phpcbf.onsave": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Execute PHP Code Beautifier and Fixer on save"
+				},
+                "phpcbf.documentFormattingProvider": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Register PHP document formatting provider, right mouse-click context menu, show as 'Format Document', after changing this option you should restart your editor."
+				},
+                "phpcbf.enable": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "This setting controls whether phpcbf formatter is enabled."
+				}
+			}
+		}
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6",
+        "eslint": "^4.6.1",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    }
+}
