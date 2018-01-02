@@ -5,7 +5,7 @@
     "version": "0.0.1",
 	"publisher": "persoderlind",
 	"homepage": "https://github.com/soderlind/vscode-phpcbf",
-    "icon": "logo.png",
+    "icon": "images/logo.png",
     "repository": {
         "type": "git",
         "url": "https://github.com/soderlind/vscode-phpcbf.git"
