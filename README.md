@@ -6,7 +6,7 @@ This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command.
 
 ## Preview
 >![phpcbf preview](images/phpcbf-preview.gif)
->###### right mouse-click, in  context menu, select 'Format Document'. Here using the `WordPress-Core` standard.
+>###### right mouse-click, in  context menu, select 'Format Document'. Here using the `WordPress-Core` standard. You can also enable formatting on save.
 
 ## Requirements
 
@@ -14,7 +14,7 @@ phpcbf must be installed. phpcbf is installed when you [install phpcs](https://g
 
 ## Extension Settings
 
-This extension contributes the following settings:
+This extension has the following settings:
 
 * `phpcbf.enable`: [ Optional | Default: true ] enable/disable this extension.
 * `phpcbf.executablePath`: [ Optional | Default: phpcbf ] Can be:
