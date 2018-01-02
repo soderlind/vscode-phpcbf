@@ -1,6 +1,6 @@
 # PHP Code Beautifier and Fixer for Visual Studio Code
 
-This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command.
+This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for Visual Studio Code.
 
 `phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a coding standard.
 
