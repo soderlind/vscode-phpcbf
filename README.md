@@ -5,7 +5,7 @@ This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for
 `phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a coding standard.
 
 ## Preview
->![phpcbf preview](images/phpcbf-preview.gif)
+>![phpcbf preview](https://raw.githubusercontent.com/soderlind/vscode-phpcbf/master/images/phpcbf-preview.gif)
 >###### right mouse-click, in  context menu, select 'Format Document'. Here using the `WordPress-Core` standard. You can also enable formatting on save.
 
 ## Requirements
