@@ -20,16 +20,16 @@ A quick install is using [composer](https://getcomposer.org/). After [installing
 
 This extension has the following settings:
 
-* `phpcbf.enable`: [ Optional | Default: true ] enable/disable this extension.
-* `phpcbf.executablePath`: [ Optional | Default: phpcbf ] Can be:
+* `phpcbf.enable`: [ Optional | Default: `true` ] enable/disable this extension.
+* `phpcbf.executablePath`: [ Optional | Default: `phpcbf` ] Can be:
 	* `${workspaceRoot}/vendor/bin/phpcbf`
 	* `~/.composer/vendor/bin/phpcbf`
 	* `phpcbf.bat`
 	* `/usr/local/bin/phpcbf`
 	* etc
-* `phpcbf.documentFormattingProvider`: [ Optional | Default: true ]  Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
-* `phpcbf.onsave`: [ Optional | Default: false ]. Run `phpcbf` on save.
-* `phpcbf.standard`: [ Optional | Default: null ]. The formatting standard.
+* `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ]  Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
+* `phpcbf.onsave`: [ Optional | Default: `false` ]. Run `phpcbf` on save.
+* `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting standard.
 	* When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`.
 	* By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`
 	* If you add a standard to phpcs, it will be available for phpcbf, eg the [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), and [Magento](https://github.com/magento/marketplace-eqp) extensions.
