@@ -48,7 +48,7 @@ class PHPCBF {
     this.documentFormattingProvider = config.get(
       "documentFormattingProvider",
       true
-    );
+	);
   }
 
   getArgs(fileName) {
