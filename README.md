@@ -23,6 +23,7 @@ This extension has the following settings:
 * `phpcbf.enable`: [ Optional | Default: `true` ] enable/disable this extension.
 * `phpcbf.executablePath`: [ Optional | Default: `phpcbf` ] Can be:
 	* `${workspaceRoot}/vendor/bin/phpcbf`
+	* `./vendor/bin/phpcbf`
 	* `~/.composer/vendor/bin/phpcbf`
 	* `phpcbf.bat`
 	* `/usr/local/bin/phpcbf`
