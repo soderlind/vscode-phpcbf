@@ -64,8 +64,11 @@ class PHPCBF {
                 .replace(/[^a-z]+/g, "")
                 .substr(0, 10) +
             ".php";
-        fs.writeFileSync(fileName, text);
-        let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
+		fs.writeFileSync(fileName, text);
+
+		let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
+		exec.stdin.end();
+
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
                 reject();
@@ -113,7 +116,6 @@ class PHPCBF {
                 fs.unlink(fileName, function(err) {});
             });
         });
-        exec.stdin.end();
 
         if (phpcbfError) {
             exec.stdout.on("data", buffer => {
