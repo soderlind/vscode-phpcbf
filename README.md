@@ -12,6 +12,8 @@ This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for
 
 phpcbf must be installed. phpcbf is installed when you [install phpcs](https://github.com/squizlabs/PHP_CodeSniffer#installation).
 
+>I recommend  phpcs version 3.2.2 or later.
+
 A quick install is using [composer](https://getcomposer.org/). After [installing composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx), in your workspace root run the following command:
 
 `composer require "squizlabs/php_codesniffer=*"`
@@ -30,6 +32,7 @@ This extension has the following settings:
 	* etc
 * `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ]  Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
 * `phpcbf.onsave`: [ Optional | Default: `false` ]. Run `phpcbf` on save.
+* `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
 * `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting standard.
 	* When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`.
 	* By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`

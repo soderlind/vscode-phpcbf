@@ -7,6 +7,7 @@ const cp = require("child_process");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
+
     constructor() {
         this.loadSettings();
     }
@@ -43,17 +44,33 @@ class PHPCBF {
             "documentFormattingProvider",
             true
         );
+
+        this.debug = config.get("debug", false);
     }
 
     getArgs(fileName) {
-        let args = ["-lq", fileName];
+		let args = [];
+        if (this.debug) {
+			args.push("-l");
+        } else {
+			args.push("-lq");
+		}
+		args.push(fileName);
+
         if (this.standard) {
             args.push("--standard=" + this.standard);
-        }
+		}
+		if (this.debug) {
+			console.group('PHPCBF');
+			console.log('PHPCBF args: ' + this.executablePath + " " +  args.join(" "));
+		}
         return args;
     }
 
     format(text) {
+        if (this.debug) {
+            console.time("phpcbf");
+        }
         let phpcbfError = false;
         let fileName =
             TmpDir +
@@ -63,10 +80,12 @@ class PHPCBF {
                 .replace(/[^a-z]+/g, "")
                 .substr(0, 10) +
             ".php";
-		fs.writeFileSync(fileName, text);
+        fs.writeFileSync(fileName, text);
 
-		let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
-		exec.stdin.end();
+        let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
+        if (!this.debug) {
+            exec.stdin.end();
+        }
 
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
@@ -122,12 +141,22 @@ class PHPCBF {
                 window.showErrorMessage(buffer.toString());
             });
         }
+        if (this.debug) {
+            exec.stdout.on("data", buffer => {
+                console.log(buffer.toString());
+            });
+        }
         exec.stderr.on("data", buffer => {
             console.log(buffer.toString());
         });
-        // exec.on("close", code => {
-        //     // console.log(code);
-        // });
+        exec.on("close", code => {
+			// console.log(code);
+			if (this.debug) {
+				console.timeEnd("phpcbf");
+				console.groupEnd();
+			}
+        });
+
 
         return promise;
     }

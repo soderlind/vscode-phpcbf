@@ -2,7 +2,7 @@
     "name": "vscode-phpcbf",
     "displayName": "phpcbf",
     "description": "PHP Code Beautifier and Fixer",
-    "version": "0.0.3",
+    "version": "0.0.4",
 	"publisher": "persoderlind",
 	"homepage": "https://github.com/soderlind/vscode-phpcbf",
     "icon": "images/logo.png",
@@ -61,6 +61,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "This setting controls whether phpcbf formatter is enabled."
+				},
+                "phpcbf.debug": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Write phpcbf stdout to the console"
 				}
 			}
 		}

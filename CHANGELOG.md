@@ -1,4 +1,7 @@
 # Change Log
+
+## 0.0.4
+- Add the `phpcbf.debug` setting. When enabled, output from phpcbf will be written to the console.
 ## 0.0.3
 - Fix phpcbf hanging issue by closing stdin [@shivanandwp](https://github.com/shivanandwp) [#2](https://github.com/soderlind/vscode-phpcbf/issues/2)
 - For relative links in settings executablePath, add support for multi-root workspaces, i.e. will look for phpcbf in all workspaces
