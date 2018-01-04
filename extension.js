@@ -54,8 +54,7 @@ class PHPCBF {
     }
 
     format(text) {
-        console.time("phpcbf");
-        phpcbfError = false;
+        let phpcbfError = false;
         let fileName =
             TmpDir +
             "/temp-" +
