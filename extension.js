@@ -54,8 +54,8 @@ class PHPCBF {
     }
 
     format(text) {
-        // autoFixing = true;
-        // phpcbfError = false;
+        console.time("phpcbf");
+        phpcbfError = false;
         let fileName =
             TmpDir +
             "/temp-" +
@@ -63,26 +63,9 @@ class PHPCBF {
                 .toString(36)
                 .replace(/[^a-z]+/g, "")
                 .substr(0, 10) +
-			".php";
-		console.log(fileName);
+            ".php";
         fs.writeFileSync(fileName, text);
-		console.log(this.executablePath);
-		if (process.platform === "win32") {
-			let exec = cp.spawn(this.executablePath, this.getArgs(fileName),(error, stdout, stderr) => {
-				if (error) {
-				  console.error(error);
-				  return;
-				});
-		} else {
-			let exec = cp.execFile(this.executablePath, this.getArgs(fileName), (error, stdout, stderr) => {
-				if (error) {
-					console.error(error);
-				  throw error;
-				}
-				console.log(stdout);
-			  });
-		}
-
+        let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
                 reject();
@@ -112,9 +95,9 @@ class PHPCBF {
                             reject();
                         }
                         break;
-                    // case 3:
-                    // 	phpcbfError = true;
-                    // 	break;
+                    case 3:
+                        phpcbfError = true;
+                        break;
                     default:
                         let msgs = {
                             3: "PHPCBF: general script execution errors.",
@@ -130,19 +113,20 @@ class PHPCBF {
                 fs.unlink(fileName, function(err) {});
             });
         });
+        exec.stdin.end();
 
-        // if (phpcbfError) {
-        exec.stdout.on("data", buffer => {
-            console.log(buffer.toString());
-            // window.showErrorMessage(buffer.toString());
-        });
-        // }
+        if (phpcbfError) {
+            exec.stdout.on("data", buffer => {
+                console.log(buffer.toString());
+                window.showErrorMessage(buffer.toString());
+            });
+        }
         exec.stderr.on("data", buffer => {
             console.log(buffer.toString());
         });
-        exec.on("close", code => {
-            console.log(code);
-        });
+        // exec.on("close", code => {
+        //     // console.log(code);
+        // });
 
         return promise;
     }
