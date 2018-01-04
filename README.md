@@ -32,7 +32,7 @@ This extension has the following settings:
 * `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting standard.
 	* When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`.
 	* By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`
-	* If you add a standard to phpcs, it will be available for phpcbf, eg the [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), and [Magento](https://github.com/magento/marketplace-eqp) extensions.
+	* If you add a standard to phpcs, it will be available for phpcbf, eg [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), [Magento](https://github.com/magento/marketplace-eqp), [Symfony](https://github.com/djoos/Symfony-coding-standard) etc.
 	* You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
 
 The default settings are
