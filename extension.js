@@ -7,21 +7,20 @@ const cp = require("child_process");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
-
     constructor() {
         this.loadSettings();
     }
 
     loadSettings() {
         let config = workspace.getConfiguration("phpcbf");
-        if (!config.get("enable") == true) {
+        if (!config.get("enable") === true) {
             return;
         }
         this.onsave = config.get("onsave", false);
 
         this.executablePath = config.get(
             "executablePath",
-            process.platform === "win32" ? "php-cbf.bat" : "phpcbf"
+            process.platform == "win32" ? "php-cbf.bat" : "phpcbf"
         );
 
         // relative paths?
@@ -49,21 +48,23 @@ class PHPCBF {
     }
 
     getArgs(fileName) {
-		let args = [];
+        let args = [];
         if (this.debug) {
-			args.push("-l");
+            args.push("-l");
         } else {
-			args.push("-lq");
-		}
-		args.push(fileName);
+            args.push("-lq");
+        }
+        args.push(fileName);
 
         if (this.standard) {
             args.push("--standard=" + this.standard);
-		}
-		if (this.debug) {
-			console.group('PHPCBF');
-			console.log('PHPCBF args: ' + this.executablePath + " " +  args.join(" "));
-		}
+        }
+        if (this.debug) {
+            console.group("PHPCBF");
+            console.log(
+                "PHPCBF args: " + this.executablePath + " " + args.join(" ")
+            );
+        }
         return args;
     }
 
@@ -150,13 +151,12 @@ class PHPCBF {
             console.log(buffer.toString());
         });
         exec.on("close", code => {
-			// console.log(code);
-			if (this.debug) {
-				console.timeEnd("phpcbf");
-				console.groupEnd();
-			}
+            // console.log(code);
+            if (this.debug) {
+                console.timeEnd("phpcbf");
+                console.groupEnd();
+            }
         });
-
 
         return promise;
     }
@@ -174,7 +174,7 @@ class PHPCBF {
             }
         }
         for (let resource of resources) {
-            if (resource.scheme === "file") {
+            if (resource.scheme == "file") {
                 const folder = workspace.getWorkspaceFolder(resource);
                 if (folder) {
                     const rootPath = folder.uri.fsPath;
@@ -198,11 +198,13 @@ exports.activate = context => {
 
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
+            const editor = window.activeTextEditor;
             if (
                 event.document.languageId == "php" &&
-                phpcbf.onsave /*&&
-                workspace.getConfiguration("editor").get("formatOnSave") ==
-                    false*/
+                phpcbf.onsave &&
+                workspace
+                    .getConfiguration("editor", editor.document.uri)
+                    .get("formatOnSave") === false
             ) {
                 event.waitUntil(
                     commands.executeCommand("editor.action.formatDocument")

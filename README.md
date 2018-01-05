@@ -5,14 +5,16 @@ This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for
 `phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a coding standard.
 
 ## Preview
->![phpcbf preview](https://raw.githubusercontent.com/soderlind/vscode-phpcbf/master/images/phpcbf-preview.gif)
->###### right mouse-click, in  context menu, select 'Format Document'. Here using the `WordPress-Core` standard. You can also enable formatting on save.
+
+> ![phpcbf preview](https://raw.githubusercontent.com/soderlind/vscode-phpcbf/master/images/phpcbf-preview.gif)
+>
+> ###### right mouse-click, in context menu, select 'Format Document'. Here using the `WordPress-Core` standard. You can also enable formatting on save.
 
 ## Requirements
 
 phpcbf must be installed. phpcbf is installed when you [install phpcs](https://github.com/squizlabs/PHP_CodeSniffer#installation).
 
->I recommend  phpcs version 3.2.2 or later.
+> I recommend phpcs version 3.2.2 or later.
 
 A quick install is using [composer](https://getcomposer.org/). After [installing composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx), in your workspace root run the following command:
 
@@ -24,30 +26,30 @@ This extension has the following settings:
 
 * `phpcbf.enable`: [ Optional | Default: `true` ] enable/disable this extension.
 * `phpcbf.executablePath`: [ Optional | Default: `phpcbf` ] Can be:
-	* `${workspaceRoot}/vendor/bin/phpcbf`
-	* `./vendor/bin/phpcbf`
-	* `~/.composer/vendor/bin/phpcbf`
-	* `phpcbf.bat`
-	* `/usr/local/bin/phpcbf`
-	* etc
-* `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ]  Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
-* `phpcbf.onsave`: [ Optional | Default: `false` ]. Run `phpcbf` on save.
+  * `${workspaceRoot}/vendor/bin/phpcbf`
+  * `./vendor/bin/phpcbf`
+  * `~/.composer/vendor/bin/phpcbf`
+  * `phpcbf.bat`
+  * `/usr/local/bin/phpcbf`
+  * etc
+* `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ] Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
+* `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
 * `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting standard.
-	* When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`.
-	* By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`
-	* If you add a standard to phpcs, it will be available for phpcbf, eg [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), [Magento](https://github.com/magento/marketplace-eqp), [Symfony](https://github.com/djoos/Symfony-coding-standard) etc.
-	* You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
+  * When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`.
+  * By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`
+  * If you add a standard to phpcs, it will be available for phpcbf, eg [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), [Magento](https://github.com/magento/marketplace-eqp), [Symfony](https://github.com/djoos/Symfony-coding-standard) etc.
+    \_ You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
 
 The default settings are
 
 ```json
 {
-	"phpcbf.enable": true,
-	"phpcbf.executablePath": "phpcbf",
-	"phpcbf.documentFormattingProvider": true,
-	"phpcbf.onsave": false,
-	"phpcbf.standard": null
+    "phpcbf.enable": true,
+    "phpcbf.executablePath": "phpcbf",
+    "phpcbf.documentFormattingProvider": true,
+    "phpcbf.onsave": false,
+    "phpcbf.standard": null
 }
 ```
 
@@ -57,14 +59,7 @@ This is the first release of my first vscode extension, you're warned :)
 
 ## Release Notes
 
-### 0.0.2
-
-* Update documentation about the `phpcbf.executablePath` setting.
-* Add credits, copyright and license.
-
-### 0.0.1
-
-Initial release
+Please see the [changelog](https://marketplace.visualstudio.com/items/persoderlind.vscode-phpcbf/changelog).
 
 ## Credits
 

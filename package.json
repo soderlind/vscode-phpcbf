@@ -2,7 +2,7 @@
     "name": "vscode-phpcbf",
     "displayName": "phpcbf",
     "description": "PHP Code Beautifier and Fixer",
-    "version": "0.0.4",
+    "version": "0.0.5",
 	"publisher": "persoderlind",
 	"homepage": "https://github.com/soderlind/vscode-phpcbf",
     "icon": "images/logo.png",
@@ -50,7 +50,7 @@
 				"phpcbf.onsave": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Execute PHP Code Beautifier and Fixer on save"
+                    "description": "Run PHP Code Beautifier and Fixer on save"
 				},
                 "phpcbf.documentFormattingProvider": {
                     "type": "boolean",
