@@ -2,7 +2,7 @@
 
 This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for Visual Studio Code.
 
-`phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a coding standard.
+`phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to [a coding standard](#standard).
 
 ## Preview
 
@@ -25,7 +25,7 @@ A quick install is using [composer](https://getcomposer.org/). After [installing
 This extension has the following settings:
 
 * `phpcbf.enable`: [ Optional | Default: `true` ] enable/disable this extension.
-* `phpcbf.executablePath`: [ Optional | Default: `phpcbf` ] Can be:
+* `phpcbf.executablePath`: [ **Required** | Default: `phpcbf` ] Can be:
   * `${workspaceRoot}/vendor/bin/phpcbf`
   * `./vendor/bin/phpcbf`
   * `~/.composer/vendor/bin/phpcbf`
@@ -36,10 +36,7 @@ This extension has the following settings:
 * `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
 * `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting standard.
-  * When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`.
-  * By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`
-  * If you add a standard to phpcs, it will be available for phpcbf, eg [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), [Magento](https://github.com/magento/marketplace-eqp), [Symfony](https://github.com/djoos/Symfony-coding-standard) etc.
-    \_ You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
+
 
 The default settings are
 
@@ -52,6 +49,20 @@ The default settings are
     "phpcbf.standard": null
 }
 ```
+
+<a name="standard"></a>
+## Formatting standards
+
+When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`. You set the default standard using `phpcs`, eg:
+
+    phpcs --config-set default_standard WordPress-Core
+
+By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`
+
+If you add a standard to phpcs, it will be available for phpcbf, eg [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), [Magento](https://github.com/magento/marketplace-eqp), [Symfony](https://github.com/djoos/Symfony-coding-standard) etc.
+
+You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
+
 
 ## Known Issues
 
