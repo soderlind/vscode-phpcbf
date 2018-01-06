@@ -35,7 +35,7 @@ This extension has the following settings:
 * `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ] Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
 * `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
-* `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting standard.
+* `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting [standard](#standard).
 
 
 The default settings are
