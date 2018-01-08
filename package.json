@@ -2,10 +2,11 @@
     "name": "vscode-phpcbf",
     "displayName": "phpcbf",
     "description": "PHP Code Beautifier and Fixer",
-    "version": "0.0.5",
+    "version": "0.0.6",
 	"publisher": "persoderlind",
 	"homepage": "https://github.com/soderlind/vscode-phpcbf",
-    "icon": "images/logo.png",
+	"icon": "images/logo.png",
+	"license": "SEE LICENSE IN LICENSE.txt",
     "repository": {
         "type": "git",
         "url": "https://github.com/soderlind/vscode-phpcbf.git"
@@ -17,7 +18,8 @@
 		"Formatters",
 		"Linters",
         "Other"
-    ],
+	],
+	"keywords": ["multi-root ready"],
     "activationEvents": [
     	"onLanguage:php"
     ],
