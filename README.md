@@ -2,7 +2,7 @@
 
 This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for Visual Studio Code.
 
-`phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to [a coding standard](#standard).
+`phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a [coding standard](#coding-standards).
 
 ## Preview
 
@@ -35,7 +35,7 @@ This extension has the following settings:
 * `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ] Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
 * `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
-* `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#standard).
+* `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#coding-standards).
 
 
 The default settings are
@@ -50,7 +50,6 @@ The default settings are
 }
 ```
 
-<a name="standard"></a>
 ## Coding standards
 
 ### null
