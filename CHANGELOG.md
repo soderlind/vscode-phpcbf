@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.6
+* Minor fixes.
+* Add license file.
+* Update documentation.
 ## 0.0.5
 
 * Fix format on save, either set setting `"phpcbf.onsave": true` or `"editor.formatOnSave": true`
@@ -13,4 +17,4 @@
 * Update documentation about the `phpcbf.executablePath` setting.
 * Add credits, copyright and license.
 ## 0.0.1
-* Initial release
+* Initial release.

@@ -16,7 +16,7 @@ phpcbf must be installed. phpcbf is installed when you [install phpcs](https://g
 
 > I recommend phpcs version 3.2.2 or later.
 
-A quick install is using [composer](https://getcomposer.org/). After [installing composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx), in your workspace root run the following command:
+A quick install is using [composer](https://getcomposer.org/). After [installing composer](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx), in your workspace root, run the following command:
 
 `composer require "squizlabs/php_codesniffer=*"`
 
@@ -35,7 +35,7 @@ This extension has the following settings:
 * `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ] Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
 * `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
-* `phpcbf.standard`: [ Optional | Default: `null` ]. The formatting [standard](#standard).
+* `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#standard).
 
 
 The default settings are
@@ -51,22 +51,28 @@ The default settings are
 ```
 
 <a name="standard"></a>
-## Formatting standards
+## Coding standards
 
-When `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`. You set the default standard using `phpcs`, eg:
+### null
+When set to `null`, phpcbf will use, if it's set, the `default_standard`, otherwise fallback to `Pear`. You set the default standard using `phpcs`, eg:
 
-    phpcs --config-set default_standard WordPress-Core
+    phpcs --config-set default_standard PSR2
 
+### Available standards
 By default, the following standards are available: `PEAR`, `Zend`, `PSR2`, `MySource`, `Squiz` and `PSR1`
 
-If you add a standard to phpcs, it will be available for phpcbf, eg [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), [Magento](https://github.com/magento/marketplace-eqp), [Symfony](https://github.com/djoos/Symfony-coding-standard) etc.
+### Additional standards
+
+If you add a standard to phpcs, it will be available for phpcbf. Some popular standards are: [Drupal](https://github.com/klausi/coder), [WordPress](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards), [Yii2](https://github.com/yiisoft/yii2-coding-standards), [Magento](https://github.com/magento/marketplace-eqp) and [Symfony](https://github.com/djoos/Symfony-coding-standard).
+
+### Rules file
 
 You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
 
 
 ## Known Issues
 
-This is the first release of my first vscode extension, you're warned :)
+None, but this is my first vscode extension, you're warned :)
 
 ## Release Notes
 
