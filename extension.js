@@ -8,7 +8,7 @@ const TmpDir = os.tmpdir();
 
 class PHPCBF {
     constructor() {
-        this.loadSettings();
+		this.loadSettings();
     }
 
     loadSettings() {
@@ -62,7 +62,7 @@ class PHPCBF {
         if (this.debug) {
             console.group("PHPCBF");
             console.log(
-                "PHPCBF args: " + this.executablePath + " " + args.join(" ")
+				"PHPCBF args: " + this.executablePath + " " + args.join(" ")
             );
         }
         return args;
