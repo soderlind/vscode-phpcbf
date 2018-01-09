@@ -1,5 +1,7 @@
 # Change Log
 
+## 0.0.8
+* Allow configuration from `.vscode/settings.json` when in a Multi-root project. [WraithKenny](https://github.com/WraithKenny) [#6](https://github.com/soderlind/vscode-phpcbf/pull/6)
 ## 0.0.7
 * In documentation, rename named anchor.
 ## 0.0.6
