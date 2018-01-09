@@ -1,5 +1,7 @@
 # Change Log
 
+## 0.0.7
+* In documentation, rename named anchor.
 ## 0.0.6
 * Minor fixes.
 * Add license file.
