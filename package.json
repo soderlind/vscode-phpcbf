@@ -10,67 +10,73 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/soderlind/vscode-phpcbf.git"
-	},
+    },
     "engines": {
         "vscode": "^1.19.0"
     },
     "categories": [
-		"Formatters",
-		"Linters",
+        "Formatters",
+        "Linters",
         "Other"
-	],
-	"keywords": ["multi-root ready"],
+    ],
+    "keywords": ["multi-root ready"],
     "activationEvents": [
-    	"onLanguage:php"
+        "onLanguage:php"
     ],
     "main": "./extension",
     "contributes": {
         "commands": [
             {
                 "command": "phpcbf-soderlind",
-				"title": "PHP Code Beautifier and Fixer: Fix this file",
-				"when": "!inOutput && editorFocus && editorLangId == php"
+                "title": "PHP Code Beautifier and Fixer: Fix this file",
+                "when": "!inOutput && editorFocus && editorLangId == php"
             }
-		],
-		"configuration": {
+        ],
+        "configuration": {
             "title": "PHP Code Beautifier and Fixer Configuration options",
             "type": "object",
             "properties": {
                 "phpcbf.executablePath": {
+                    "scope": "resource",
                     "type": "string",
                     "default": "phpcbf",
                     "description": "Points to the phpcbf exectuable, eg: win: phpcbf.bat, other: phpcbf"
-				},
-				"phpcbf.standard": {
+                },
+                "phpcbf.standard": {
+                    "scope": "resource",
                     "type": [
-						"string",
-						"null"
-					],
+                        "string",
+                        "null"
+                    ],
                     "default": null,
                     "description": "null, PSR1, PSR2, Symfony, WordPress etc. You can also point to a phpcs.xml rules file, eg: /file/path/phpcs.xml"
-				},
-				"phpcbf.onsave": {
+                },
+                "phpcbf.onsave": {
+                    "scope": "resource",
                     "type": "boolean",
                     "default": false,
                     "description": "Run PHP Code Beautifier and Fixer on save"
-				},
+                },
                 "phpcbf.documentFormattingProvider": {
+                    "scope": "resource",
                     "type": "boolean",
                     "default": true,
                     "description": "Register PHP document formatting provider, right mouse-click context menu, show as 'Format Document', after changing this option you should restart your editor."
-				},
+                },
                 "phpcbf.enable": {
+                    "scope": "resource",
                     "type": "boolean",
                     "default": true,
                     "description": "This setting controls whether phpcbf formatter is enabled."
-				},
+                },
                 "phpcbf.debug": {
+                    "scope": "resource",
                     "type": "boolean",
                     "default": false,
                     "description": "Write phpcbf stdout to the console"
-				}
-			}
-		}
+                }
+            }
+        }
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",

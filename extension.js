@@ -8,11 +8,11 @@ const TmpDir = os.tmpdir();
 
 class PHPCBF {
     constructor() {
-		this.loadSettings();
+        this.loadSettings();
     }
 
     loadSettings() {
-        let config = workspace.getConfiguration("phpcbf");
+        let config = workspace.getConfiguration("phpcbf",window.activeTextEditor.document.uri);
         if (!config.get("enable") === true) {
             return;
         }
@@ -24,8 +24,8 @@ class PHPCBF {
         );
 
         // relative paths?
-        if (this.executablePath.startsWith("${workspaceRoot}")) {
-            this.addRootPath("${workspaceRoot}");
+        if (this.executablePath.startsWith("${workspaceRoot}") || this.executablePath.startsWith("${workspaceFolder}")) {
+            this.addRootPath("${workspaceFolder}");
         }
         if (this.executablePath.startsWith(".")) {
             this.addRootPath(".");
@@ -62,7 +62,7 @@ class PHPCBF {
         if (this.debug) {
             console.group("PHPCBF");
             console.log(
-				"PHPCBF args: " + this.executablePath + " " + args.join(" ")
+                "PHPCBF args: " + this.executablePath + " " + args.join(" ")
             );
         }
         return args;
@@ -100,11 +100,11 @@ class PHPCBF {
             });
             exec.on("exit", code => {
                 /*  phpcbf exit codes:
-				Exit code 0 is used to indicate that no fixable errors were found, so nothing was fixed
-				Exit code 1 is used to indicate that all fixable errors were fixed correctly
-				Exit code 2 is used to indicate that PHPCBF failed to fix some of the fixable errors it found
-				Exit code 3 is used for general script execution errors
-				*/
+                Exit code 0 is used to indicate that no fixable errors were found, so nothing was fixed
+                Exit code 1 is used to indicate that all fixable errors were fixed correctly
+                Exit code 2 is used to indicate that PHPCBF failed to fix some of the fixable errors it found
+                Exit code 3 is used for general script execution errors
+                */
                 switch (code) {
                     case 0:
                         break;
