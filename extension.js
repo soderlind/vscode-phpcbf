@@ -12,7 +12,10 @@ class PHPCBF {
     }
 
     loadSettings() {
-        let config = workspace.getConfiguration("phpcbf",window.activeTextEditor.document.uri);
+        let config = workspace.getConfiguration(
+            "phpcbf",
+            window.activeTextEditor.document.uri
+        );
         if (!config.get("enable") === true) {
             return;
         }
@@ -23,8 +26,15 @@ class PHPCBF {
             process.platform == "win32" ? "php-cbf.bat" : "phpcbf"
         );
 
-        // relative paths?
-        if (this.executablePath.startsWith("${workspaceRoot}") || this.executablePath.startsWith("${workspaceFolder}")) {
+        /**
+         * relative paths?
+         */
+
+        // ${workspaceRoot} is deprecated
+        if (this.executablePath.startsWith("${workspaceRoot}")) {
+            this.addRootPath("${workspaceRoot}");
+        }
+        if (this.executablePath.startsWith("${workspaceFolder}")) {
             this.addRootPath("${workspaceFolder}");
         }
         if (this.executablePath.startsWith(".")) {
