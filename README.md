@@ -50,6 +50,8 @@ The default settings are
 }
 ```
 
+In a multi-root project, settings can be saved in `.vscode/settings.json`
+
 ## Coding standards
 
 ### null
