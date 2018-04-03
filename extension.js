@@ -70,7 +70,7 @@ class PHPCBF {
             args.push("--standard=" + this.standard);
         }
         if (this.debug) {
-            console.group("PHPCBF");
+            console.log("----- PHPCBF -----");
             console.log(
                 "PHPCBF args: " + this.executablePath + " " + args.join(" ")
             );
@@ -93,7 +93,11 @@ class PHPCBF {
             ".php";
         fs.writeFileSync(fileName, text);
 
-        let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
+        let cmdOptions = {
+            cwd: TmpDir
+        };
+
+        let exec = cp.spawn(this.executablePath, this.getArgs(fileName), cmdOptions);
         if (!this.debug) {
             exec.stdin.end();
         }
@@ -164,7 +168,7 @@ class PHPCBF {
             // console.log(code);
             if (this.debug) {
                 console.timeEnd("phpcbf");
-                console.groupEnd();
+                console.log("----- END PHPCBF -----");
             }
         });
 
