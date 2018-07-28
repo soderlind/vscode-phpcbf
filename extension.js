@@ -19,6 +19,9 @@ class PHPCBF {
         if (!config.get("enable") === true) {
             return;
         }
+
+        this.log = vscode.window.createOutputChannel('phpcbf');
+
         this.onsave = config.get("onsave", false);
 
         this.executablePath = config.get(
@@ -70,8 +73,7 @@ class PHPCBF {
             args.push("--standard=" + this.standard);
         }
         if (this.debug) {
-            console.group("PHPCBF");
-            console.log(
+            this.log.appendLine(
                 "PHPCBF args: " + this.executablePath + " " + args.join(" ")
             );
         }
@@ -79,9 +81,6 @@ class PHPCBF {
     }
 
     format(text) {
-        if (this.debug) {
-            console.time("phpcbf");
-        }
         let phpcbfError = false;
         let fileName =
             TmpDir +
@@ -101,7 +100,7 @@ class PHPCBF {
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
                 reject();
-                console.log(err);
+                this.log.appendLine(err);
                 if (err.code == "ENOENT") {
                     window.showErrorMessage(
                         "PHPCBF: " + err.message + ". executablePath not found."
@@ -148,24 +147,19 @@ class PHPCBF {
 
         if (phpcbfError) {
             exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
+                this.log.appendLine(buffer.toString());
                 window.showErrorMessage(buffer.toString());
             });
         }
         if (this.debug) {
             exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
+                this.log.appendLine(buffer.toString());
             });
         }
         exec.stderr.on("data", buffer => {
-            console.log(buffer.toString());
+            this.log.appendLine(buffer.toString());
         });
         exec.on("close", code => {
-            // console.log(code);
-            if (this.debug) {
-                console.timeEnd("phpcbf");
-                console.groupEnd();
-            }
         });
 
         return promise;
@@ -258,7 +252,7 @@ exports.activate = context => {
                                 }
                             })
                             .catch(err => {
-                                console.log(err);
+                                this.log.appendLine(err);
                                 reject();
                             });
                     });
