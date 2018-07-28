@@ -4,6 +4,7 @@ const { commands, workspace, window, languages, Range, Position } = vscode;
 const fs = require("fs");
 const os = require("os");
 const cp = require("child_process");
+const path = require("path");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
@@ -85,7 +86,8 @@ class PHPCBF {
         let phpcbfError = false;
         let fileName =
             TmpDir +
-            "/temp-" +
+            path.sep +
+            "temp-" +
             Math.random()
                 .toString(36)
                 .replace(/[^a-z]+/g, "")
