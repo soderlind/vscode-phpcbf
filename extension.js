@@ -1,6 +1,14 @@
 "use strict";
 const vscode = require("vscode");
-const { commands, workspace, window, languages, Range, Position } = vscode;
+const {
+    commands,
+    workspace,
+    window,
+    languages,
+    Range,
+    Position
+} = vscode;
+const path = require("path");
 const fs = require("fs");
 const os = require("os");
 const cp = require("child_process");
@@ -57,14 +65,16 @@ class PHPCBF {
         this.debug = config.get("debug", false);
     }
 
-    getArgs(fileName) {
+    getArgs(document, tmpFileName) {
         let args = [];
         if (this.debug) {
             args.push("-l");
         } else {
             args.push("-lq");
         }
-        args.push(fileName);
+        args.push(tmpFileName);
+
+        this.standard = this.getStandard(document);
 
         if (this.standard) {
             args.push("--standard=" + this.standard);
@@ -78,22 +88,68 @@ class PHPCBF {
         return args;
     }
 
-    format(text) {
+    getStandard(document) {
+        // Check if a config file exists and handle it
+        let standard = null;
+        const folder = workspace.getWorkspaceFolder(document.uri);
+        const workspaceRoot = folder ? folder.uri.fsPath : null;
+        const filePath = document.fileName;
+        if (true && workspaceRoot !== null && filePath !== undefined) {
+            const confFileNames = [
+                '.phpcs.xml', '.phpcs.xml.dist', 'phpcs.xml', 'phpcs.xml.dist',
+                'phpcs.ruleset.xml', 'ruleset.xml',
+            ];
+
+            const fileDir = path.relative(workspaceRoot, path.dirname(filePath));
+            const confFile = this.findFiles(workspaceRoot, fileDir, confFileNames);
+
+            standard = confFile || this.standard;
+        } else {
+            standard = this.standard;
+        }
+
+        return standard;
+    }
+
+    findFiles(parent, directory, name) {
+        const names = [].concat(name);
+        const chunks = path.resolve(parent, directory).split(path.sep);
+
+        while (chunks.length) {
+            let currentDir = chunks.join(path.sep);
+            for (const fileName of names) {
+                const filePath = path.join(currentDir, fileName);
+                if (fs.existsSync(filePath)) {
+                    return filePath;
+                }
+            }
+            if (parent === currentDir) {
+                break;
+            }
+            chunks.pop();
+        }
+
+        return null;
+    }
+
+    format(document) {
         if (this.debug) {
             console.time("phpcbf");
         }
+        let text = document.getText();
+
         let phpcbfError = false;
         let fileName =
             TmpDir +
             "/temp-" +
             Math.random()
-                .toString(36)
-                .replace(/[^a-z]+/g, "")
-                .substr(0, 10) +
+            .toString(36)
+            .replace(/[^a-z]+/g, "")
+            .substr(0, 10) +
             ".php";
         fs.writeFileSync(fileName, text);
 
-        let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
+        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
         if (!this.debug) {
             exec.stdin.end();
         }
@@ -142,7 +198,7 @@ class PHPCBF {
                         break;
                 }
 
-                fs.unlink(fileName, function(err) {});
+                fs.unlink(fileName, function (err) {});
             });
         });
 
@@ -213,8 +269,8 @@ exports.activate = context => {
                 event.document.languageId == "php" &&
                 phpcbf.onsave &&
                 workspace
-                    .getConfiguration("editor", editor.document.uri)
-                    .get("formatOnSave") === false
+                .getConfiguration("editor", editor.document.uri)
+                .get("formatOnSave") === false
             ) {
                 event.waitUntil(
                     commands.executeCommand("editor.action.formatDocument")
@@ -242,14 +298,14 @@ exports.activate = context => {
             languages.registerDocumentFormattingEditProvider("php", {
                 provideDocumentFormattingEdits: (document, options, token) => {
                     return new Promise((resolve, reject) => {
-                        let originalText = document.getText();
+                        const originalText = document.getText();
                         let lastLine = document.lineAt(document.lineCount - 1);
                         let range = new Range(
                             new Position(0, 0),
                             lastLine.range.end
                         );
                         phpcbf
-                            .format(originalText)
+                            .format(document)
                             .then(text => {
                                 if (text != originalText) {
                                     resolve([new vscode.TextEdit(range, text)]);
