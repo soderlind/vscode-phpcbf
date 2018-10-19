@@ -34,6 +34,8 @@ class PHPCBF {
             process.platform == "win32" ? "php-cbf.bat" : "phpcbf"
         );
 
+        this.configSearch = config.get("configSearch", false);
+
         /**
          * relative paths?
          */
@@ -94,7 +96,7 @@ class PHPCBF {
         const folder = workspace.getWorkspaceFolder(document.uri);
         const workspaceRoot = folder ? folder.uri.fsPath : null;
         const filePath = document.fileName;
-        if (true && workspaceRoot !== null && filePath !== undefined) {
+        if (this.configSearch && workspaceRoot !== null && filePath !== undefined) {
             const confFileNames = [
                 '.phpcs.xml', '.phpcs.xml.dist', 'phpcs.xml', 'phpcs.xml.dist',
                 'phpcs.ruleset.xml', 'ruleset.xml',
