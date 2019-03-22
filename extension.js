@@ -47,8 +47,14 @@ class PHPCBF {
             );
         }
 
-        this.standard = config.get("standard", null);
+        const pathToPhpcsConfig = workspace.rootPath + '/phpcs.xml';
 
+        if(fs.existsSync(pathToPhpcsConfig)) {
+            this.standard = pathToPhpcsConfig;    
+        } else {
+            this.standard = config.get("standard", null);    
+        }
+        
         this.documentFormattingProvider = config.get(
             "documentFormattingProvider",
             true
