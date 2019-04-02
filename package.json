@@ -3,10 +3,10 @@
     "displayName": "phpcbf",
     "description": "PHP Code Beautifier and Fixer",
     "version": "0.0.8",
-	"publisher": "persoderlind",
-	"homepage": "https://github.com/soderlind/vscode-phpcbf",
-	"icon": "images/logo.png",
-	"license": "SEE LICENSE IN LICENSE.txt",
+    "publisher": "persoderlind",
+    "homepage": "https://github.com/soderlind/vscode-phpcbf",
+    "icon": "images/logo.png",
+    "license": "SEE LICENSE IN LICENSE.txt",
     "repository": {
         "type": "git",
         "url": "https://github.com/soderlind/vscode-phpcbf.git"
@@ -25,13 +25,11 @@
     ],
     "main": "./extension",
     "contributes": {
-        "commands": [
-            {
-                "command": "phpcbf-soderlind",
-                "title": "PHP Code Beautifier and Fixer: Fix this file",
-                "when": "!inOutput && editorFocus && editorLangId == php"
-            }
-        ],
+        "commands": [{
+            "command": "phpcbf-soderlind",
+            "title": "PHP Code Beautifier and Fixer: Fix this file",
+            "when": "!inOutput && editorFocus && editorLangId == php"
+        }],
         "configuration": {
             "title": "PHP Code Beautifier and Fixer Configuration options",
             "type": "object",
@@ -41,6 +39,12 @@
                     "type": "string",
                     "default": "phpcbf",
                     "description": "Points to the phpcbf exectuable, eg: win: phpcbf.bat, other: phpcbf"
+                },
+                "phpcbf.configSearch": {
+                    "scope": "resource",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Search for phpcs configuration files in the workspace."
                 },
                 "phpcbf.standard": {
                     "scope": "resource",
