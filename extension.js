@@ -36,28 +36,58 @@ class PHPCBF {
 
         this.configSearch = config.get("configSearch", false);
 
-        /**
-         * relative paths?
-         */
 
-        // ${workspaceRoot} is deprecated
-        if (this.executablePath.startsWith("${workspaceRoot}")) {
-            this.addRootPath("${workspaceRoot}");
+        const resolvePath = (key) => {
+            const addRootPath = (prefix) => {
+              const resources = [];
+              if (workspace.workspaceFolders) {
+                for (let wsFolder of workspace.workspaceFolders) {
+                    resources.push(wsFolder.uri);
+                }
+              } else {
+                const editor = window.activeTextEditor;
+                if (editor) {
+                    resources.push(editor.document.uri);
+                }
+              }
+              for (let resource of resources) {
+                if (resource.scheme == "file") {
+                    const folder = workspace.getWorkspaceFolder(resource);
+                    if (folder) {
+                        const rootPath = folder.uri.fsPath;
+                        let tmpPath = this[key].replace(prefix, rootPath);
+                        fs.exists(tmpPath, exists => {
+                            if (exists) {
+                                this[key] = tmpPath;
+                            }
+                        });
+                    }
+                }
+              }
+            }
+            if (this[key].startsWith("${workspaceRoot}")) {
+                addRootPath("${workspaceRoot}");
+            }
+            if (this[key].startsWith("${workspaceFolder}")) {
+                addRootPath("${workspaceFolder}");
+            }
+            if (this[key].startsWith(".")) {
+                addRootPath(".");
+            }
+            if (this[key].startsWith("~")) {
+                this[key] = this[key].replace(/^~\//, os.homedir() + "/");
+            }
         }
-        if (this.executablePath.startsWith("${workspaceFolder}")) {
-            this.addRootPath("${workspaceFolder}");
-        }
-        if (this.executablePath.startsWith(".")) {
-            this.addRootPath(".");
-        }
-        if (this.executablePath.startsWith("~")) {
-            this.executablePath = this.executablePath.replace(
-                /^~\//,
-                os.homedir() + "/"
-            );
-        }
-
+    
+        this.executablePath = config.get(
+            "executablePath",
+            process.platform == "win32" ? "php-cbf.bat" : "phpcbf"
+        );
+        resolvePath('executablePath');
+    
         this.standard = config.get("standard", null);
+        if (this.standard) resolvePath('standard');
+    
 
         this.documentFormattingProvider = config.get(
             "documentFormattingProvider",
@@ -91,6 +121,7 @@ class PHPCBF {
     }
 
     getStandard(document) {
+        if (this.standard) return this.standard;
         // Check if a config file exists and handle it
         let standard = null;
         const folder = workspace.getWorkspaceFolder(document.uri);
@@ -151,7 +182,9 @@ class PHPCBF {
             ".php";
         fs.writeFileSync(fileName, text);
 
-        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
+        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName), {
+            cwd: vscode.workspace.rootPath
+        });
         if (!this.debug) {
             exec.stdin.end();
         }
