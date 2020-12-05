@@ -88,12 +88,12 @@ class PHPCBF {
             );
         }
         return args;
-    }
+	 }
 
     getStandard(document) {
         // Check if a config file exists and handle it
-        let standard = null;
-        const folder = workspace.getWorkspaceFolder(document.uri);
+		 let standard = null;
+		 const folder = workspace.getWorkspaceFolder(document.uri);
         const workspaceRoot = folder ? folder.uri.fsPath : null;
         const filePath = document.fileName;
         if (this.configSearch && workspaceRoot !== null && filePath !== undefined) {
@@ -111,7 +111,7 @@ class PHPCBF {
         }
 
         return standard;
-    }
+	 }
 
     findFiles(parent, directory, name) {
         const names = [].concat(name);
@@ -132,14 +132,19 @@ class PHPCBF {
         }
 
         return null;
-    }
+	 }
 
-    format(document) {
+    format(document, range) {
         if (this.debug) {
             console.time("phpcbf");
-        }
-        let text = document.getText();
-
+		  }
+		  let text = document.getText();
+        if (range) {
+            text = this.insertAtLine(text, range);
+		  }
+		  if (this.debug) {
+            console.log(text);
+		  }
         let phpcbfError = false;
         let fileName =
             TmpDir +
@@ -200,7 +205,7 @@ class PHPCBF {
                         break;
                 }
 
-                fs.unlink(fileName, function (err) {});
+                fs.unlink(fileName, function (err) { });
             });
         });
 
@@ -259,6 +264,58 @@ class PHPCBF {
             }
         }
     }
+
+    insertAtLine(text, range) {
+       let nLines = 0;
+       let length = text.length;
+       let tag = '\n// everythingbetweenthesetagsiscollected\n';
+		 let offset = 1;
+		 let start = false;
+		 let end = false;
+		 let lastLine = vscode.window.activeTextEditor.document.lineCount - 1;
+		 let i = 0;
+		 if (parseInt(range.start.line) === 0) {
+			//  console.log('added tag at 0');
+			text = this.insert(0, tag, text);
+			length += tag.length;
+			nLines++;
+			start = true;
+			i += tag.length;
+		}
+		 if (parseInt(range.end.line) === lastLine || parseInt(range.end.line) === lastLine - 1) {
+			//  console.log('added tag at end');
+			 end = true;
+			 length += tag.length;
+			 text = this.insert(length, tag, text);
+		}
+		 for (i; i < length; i++) {
+            if (parseInt(range.start.line) === nLines && nLines !== 0 && ! start ) {
+               //  console.log(nLines);
+                text = this.insert(i - offset, tag, text);
+                length += tag.length;
+                i += tag.length;
+                nLines++;
+            }
+            if (nLines === parseInt(range.end.line) + 2 && ! end ) {
+               //  console.log(nLines);
+                text = this.insert(i, tag, text);
+                length += tag.length;
+                i += tag.length;
+                nLines++;
+				}
+            if (text[i] === '\n') {
+                nLines++;
+            }
+		 }
+      return text;
+	 }
+
+	insert(index, string, text) {
+		if (index > 0) {
+        return text.substring(0, index) + string + text.substring(index, text.length);
+  		}
+   	return string + text;
+	}
 }
 
 exports.activate = context => {
@@ -285,6 +342,7 @@ exports.activate = context => {
         commands.registerTextEditorCommand("phpcbf-soderlind", textEditor => {
             if (textEditor.document.languageId == "php") {
                 commands.executeCommand("editor.action.formatDocument");
+                commands.executeCommand("editor.action.formatSelection");
             }
         })
     );
@@ -311,6 +369,57 @@ exports.activate = context => {
                             .then(text => {
                                 if (text != originalText) {
                                     resolve([new vscode.TextEdit(range, text)]);
+                                } else {
+                                    reject();
+                                }
+                            })
+                            .catch(err => {
+                                console.log(err);
+                                reject();
+                            });
+                    });
+                }
+            }),
+            languages.registerDocumentRangeFormattingEditProvider("php", {
+                provideDocumentRangeFormattingEdits: (document, range, options, token) => {
+                    const editor = vscode.window.activeTextEditor;
+                    let allText = editor.document.getText();
+                    return new Promise((resolve, reject) => {
+                        phpcbf
+                            .format(document, range)
+                            .then(text => {
+                                const regex = /\/\/ everythingbetweenthesetagsiscollected([\S\s]*?)\/\/ everythingbetweenthesetagsiscollected/gm;
+                                const str = text;
+                                let m;
+                                while ((m = regex.exec(str)) !== null) {
+                                    if (m.index === regex.lastIndex) {
+                                        regex.lastIndex++;
+                                    }
+                                    m.forEach((match, groupIndex) => {
+                                        text = match;
+                                    });
+                                }
+                                // remove leading linebreaks
+                                text = text.replace(/^[\r|\n|\r\n]+/, '');
+                                // remove trailing whitespace/linebreaks
+										 let lastSelectedLine = editor.document.lineAt(range.end.line);
+										 let lastLine = editor.document.lineCount - 1;
+
+										 if (lastSelectedLine._line !== lastLine && lastSelectedLine._line !== lastLine - 1) {
+											 //console.log('removing useless whitespace');
+											 text = text.trimEnd();
+										 } else {
+											 text = text.trimEnd();
+											 text += '\n';
+										 }
+
+                                if (text != allText) {
+											  let lastCharPos = Math.max(lastSelectedLine.text.length, 0);
+											  let newRange = new vscode.Range(
+												  new Position(range.start.line, 0),
+												  new Position(range.end.line, lastCharPos),
+												);
+                                    resolve([new vscode.TextEdit(newRange, text)]);
                                 } else {
                                     reject();
                                 }
