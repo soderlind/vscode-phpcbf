@@ -1,8 +1,15 @@
 "use strict";
 const vscode = require("vscode");
-const { commands, workspace, window, languages, Range, Position } = vscode;
+const {
+    commands,
+    workspace,
+    window,
+    languages,
+    Range,
+    Position
+} = vscode;
+const path = require("path");
 const fs = require("fs");
-const lazy = require("lazy");
 const os = require("os");
 const cp = require("child_process");
 const TmpDir = os.tmpdir();
@@ -60,14 +67,16 @@ class PHPCBF {
         this.debug = config.get("debug", false);
     }
 
-    getArgs(fileName) {
+    getArgs(document, tmpFileName) {
         let args = [];
         if (this.debug) {
             args.push("-l");
         } else {
             args.push("-lq");
         }
-        args.push(fileName);
+        args.push(tmpFileName);
+
+        this.standard = this.getStandard(document);
 
         if (this.standard) {
             args.push("--standard=" + this.standard);
@@ -79,28 +88,75 @@ class PHPCBF {
             );
         }
         return args;
-    }
+	 }
 
-    format(text, range) {
+    getStandard(document) {
+        // Check if a config file exists and handle it
+		 let standard = null;
+		 const folder = workspace.getWorkspaceFolder(document.uri);
+        const workspaceRoot = folder ? folder.uri.fsPath : null;
+        const filePath = document.fileName;
+        if (this.configSearch && workspaceRoot !== null && filePath !== undefined) {
+            const confFileNames = [
+                '.phpcs.xml', '.phpcs.xml.dist', 'phpcs.xml', 'phpcs.xml.dist',
+                'phpcs.ruleset.xml', 'ruleset.xml',
+            ];
+
+            const fileDir = path.relative(workspaceRoot, path.dirname(filePath));
+            const confFile = this.findFiles(workspaceRoot, fileDir, confFileNames);
+
+            standard = confFile || this.standard;
+        } else {
+            standard = this.standard;
+        }
+
+        return standard;
+	 }
+
+    findFiles(parent, directory, name) {
+        const names = [].concat(name);
+        const chunks = path.resolve(parent, directory).split(path.sep);
+
+        while (chunks.length) {
+            let currentDir = chunks.join(path.sep);
+            for (const fileName of names) {
+                const filePath = path.join(currentDir, fileName);
+                if (fs.existsSync(filePath)) {
+                    return filePath;
+                }
+            }
+            if (parent === currentDir) {
+                break;
+            }
+            chunks.pop();
+        }
+
+        return null;
+	 }
+
+    format(document, range) {
         if (this.debug) {
             console.time("phpcbf");
-        }
+		  }
+		  let text = document.getText();
         if (range) {
             text = this.insertAtLine(text, range);
-        }
-        // console.log(text);
+		  }
+		  if (this.debug) {
+            console.log(text);
+		  }
         let phpcbfError = false;
         let fileName =
             TmpDir +
             "/temp-" +
             Math.random()
-                .toString(36)
-                .replace(/[^a-z]+/g, "")
-                .substr(0, 10) +
+            .toString(36)
+            .replace(/[^a-z]+/g, "")
+            .substr(0, 10) +
             ".php";
         fs.writeFileSync(fileName, text);
 
-        let exec = cp.spawn(this.executablePath, this.getArgs(fileName));
+        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
         if (!this.debug) {
             exec.stdin.end();
         }
@@ -210,14 +266,14 @@ class PHPCBF {
     }
 
     insertAtLine(text, range) {
-       var nLines = 0;
-       var length = text.length;
-       var tag = '\n// everthingbetweenthesetagsiscollected\n';
-		 var offset = 1;
-		 var start = false;
-		 var end = false;
-		 var lastLine = vscode.window.activeTextEditor.document.lineCount - 1;
-		 var i = 0;
+       let nLines = 0;
+       let length = text.length;
+       let tag = '\n// everythingbetweenthesetagsiscollected\n';
+		 let offset = 1;
+		 let start = false;
+		 let end = false;
+		 let lastLine = vscode.window.activeTextEditor.document.lineCount - 1;
+		 let i = 0;
 		 if (parseInt(range.start.line) === 0) {
 			//  console.log('added tag at 0');
 			text = this.insert(0, tag, text);
@@ -234,14 +290,14 @@ class PHPCBF {
 		}
 		 for (i; i < length; i++) {
             if (parseInt(range.start.line) === nLines && nLines !== 0 && ! start ) {
-                console.log(nLines);
+               //  console.log(nLines);
                 text = this.insert(i - offset, tag, text);
                 length += tag.length;
                 i += tag.length;
                 nLines++;
             }
             if (nLines === parseInt(range.end.line) + 2 && ! end ) {
-                console.log(nLines);
+               //  console.log(nLines);
                 text = this.insert(i, tag, text);
                 length += tag.length;
                 i += tag.length;
@@ -272,8 +328,8 @@ exports.activate = context => {
                 event.document.languageId == "php" &&
                 phpcbf.onsave &&
                 workspace
-                    .getConfiguration("editor", editor.document.uri)
-                    .get("formatOnSave") === false
+                .getConfiguration("editor", editor.document.uri)
+                .get("formatOnSave") === false
             ) {
                 event.waitUntil(
                     commands.executeCommand("editor.action.formatDocument")
@@ -302,14 +358,14 @@ exports.activate = context => {
             languages.registerDocumentFormattingEditProvider("php", {
                 provideDocumentFormattingEdits: (document, options, token) => {
                     return new Promise((resolve, reject) => {
-                        let originalText = document.getText();
+                        const originalText = document.getText();
                         let lastLine = document.lineAt(document.lineCount - 1);
                         let range = new Range(
                             new Position(0, 0),
                             lastLine.range.end
                         );
                         phpcbf
-                            .format(originalText)
+                            .format(document)
                             .then(text => {
                                 if (text != originalText) {
                                     resolve([new vscode.TextEdit(range, text)]);
@@ -330,9 +386,9 @@ exports.activate = context => {
                     let allText = editor.document.getText();
                     return new Promise((resolve, reject) => {
                         phpcbf
-                            .format(allText, range)
+                            .format(document, range)
                             .then(text => {
-                                const regex = /\/\/ everthingbetweenthesetagsiscollected([\S\s]*?)\/\/ everthingbetweenthesetagsiscollected/gm;
+                                const regex = /\/\/ everythingbetweenthesetagsiscollected([\S\s]*?)\/\/ everythingbetweenthesetagsiscollected/gm;
                                 const str = text;
                                 let m;
                                 while ((m = regex.exec(str)) !== null) {
@@ -346,13 +402,12 @@ exports.activate = context => {
                                 // remove leading linebreaks
                                 text = text.replace(/^[\r|\n|\r\n]+/, '');
                                 // remove trailing whitespace/linebreaks
-										 var lastSelectedLine = editor.document.lineAt(range.end.line);
-										 var lastLine = editor.document.lineCount - 1;
+										 let lastSelectedLine = editor.document.lineAt(range.end.line);
+										 let lastLine = editor.document.lineCount - 1;
 
 										 if (lastSelectedLine._line !== lastLine && lastSelectedLine._line !== lastLine - 1) {
-											 console.log('removing useless whitespace');
+											 //console.log('removing useless whitespace');
 											 text = text.trimEnd();
-											//  text += '\n';
 										 } else {
 											 text = text.trimEnd();
 											 text += '\n';
@@ -360,7 +415,7 @@ exports.activate = context => {
 
                                 if (text != allText) {
 											  let lastCharPos = Math.max(lastSelectedLine.text.length, 0);
-											  var newRange = new vscode.Range(
+											  let newRange = new vscode.Range(
 												  new Position(range.start.line, 0),
 												  new Position(range.end.line, lastCharPos),
 												);
@@ -370,7 +425,6 @@ exports.activate = context => {
                                 }
                             })
                             .catch(err => {
-                                console.log('error');
                                 console.log(err);
                                 reject();
                             });
