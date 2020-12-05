@@ -175,6 +175,7 @@ class PHPCBF {
                 */
                 switch (code) {
                     case 0:
+                        reject();
                         break;
                     case 1:
                     case 2:
@@ -187,6 +188,7 @@ class PHPCBF {
                         break;
                     case 3:
                         phpcbfError = true;
+                        reject();
                         break;
                     default:
                         let msgs = {
