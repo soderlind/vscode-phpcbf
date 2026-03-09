@@ -19,11 +19,13 @@ class PHPCBF {
         this.loadSettings();
     }
 
-    loadSettings() {
-        let config = workspace.getConfiguration(
-            "phpcbf",
-            window.activeTextEditor.document.uri
-        );
+    loadSettings(uri) {
+        // Use the provided URI (e.g. the document being formatted), fall back to
+        // the active editor, or null (global settings) if neither is available.
+        const configUri = uri ||
+            (window.activeTextEditor ? window.activeTextEditor.document.uri : null);
+
+        let config = workspace.getConfiguration("phpcbf", configUri);
         if (!config.get("enable") === true) {
             return;
         }
@@ -58,6 +60,17 @@ class PHPCBF {
         }
 
         this.standard = config.get("standard", null);
+
+        // Resolve ${workspaceFolder} / ${workspaceRoot} in the standard path.
+        if (this.standard && configUri) {
+            const folder = workspace.getWorkspaceFolder(configUri);
+            const rootPath = folder ? folder.uri.fsPath : null;
+            if (rootPath) {
+                this.standard = this.standard
+                    .replace("${workspaceFolder}", rootPath)
+                    .replace("${workspaceRoot}", rootPath);
+            }
+        }
 
         this.documentFormattingProvider = config.get(
             "documentFormattingProvider",
@@ -135,6 +148,10 @@ class PHPCBF {
     }
 
     format(document) {
+        // Reload settings scoped to this document so multi-root workspaces and
+        // per-folder settings are respected on every format call.
+        this.loadSettings(document.uri);
+
         if (this.debug) {
             console.time("phpcbf");
         }
@@ -266,12 +283,11 @@ exports.activate = context => {
 
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
-            const editor = window.activeTextEditor;
             if (
                 event.document.languageId == "php" &&
                 phpcbf.onsave &&
                 workspace
-                .getConfiguration("editor", editor.document.uri)
+                .getConfiguration("editor", event.document.uri)
                 .get("formatOnSave") === false
             ) {
                 event.waitUntil(

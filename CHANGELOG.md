@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.0.9
+* Fix crash on activation and configuration reload when no text editor is active (`window.activeTextEditor` is `null`). Closes #35, #43.
+* Reload settings per-document on every format call, so per-folder and multi-root workspace settings are respected. Closes #36.
+* Resolve `${workspaceFolder}` and `${workspaceRoot}` variables in the `phpcbf.standard` setting. Closes #38.
+* Use `event.document.uri` (instead of `window.activeTextEditor`) in the `onWillSaveTextDocument` listener to avoid potential null-reference errors.
+
 ## 0.0.8
 * Allow configuration from `.vscode/settings.json` when in a Multi-root project. [@WraithKenny](https://github.com/WraithKenny) [#6](https://github.com/soderlind/vscode-phpcbf/pull/6)
 ## 0.0.7
