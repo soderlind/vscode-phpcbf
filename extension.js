@@ -12,6 +12,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 const cp = require("child_process");
+const { findFiles } = require("./lib/utils");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
@@ -116,7 +117,7 @@ class PHPCBF {
             ];
 
             const fileDir = path.relative(workspaceRoot, path.dirname(filePath));
-            const confFile = this.findFiles(workspaceRoot, fileDir, confFileNames);
+            const confFile = findFiles(workspaceRoot, fileDir, confFileNames);
 
             standard = confFile || this.standard;
         } else {
@@ -124,27 +125,6 @@ class PHPCBF {
         }
 
         return standard;
-    }
-
-    findFiles(parent, directory, name) {
-        const names = [].concat(name);
-        const chunks = path.resolve(parent, directory).split(path.sep);
-
-        while (chunks.length) {
-            let currentDir = chunks.join(path.sep);
-            for (const fileName of names) {
-                const filePath = path.join(currentDir, fileName);
-                if (fs.existsSync(filePath)) {
-                    return filePath;
-                }
-            }
-            if (parent === currentDir) {
-                break;
-            }
-            chunks.pop();
-        }
-
-        return null;
     }
 
     format(document) {
