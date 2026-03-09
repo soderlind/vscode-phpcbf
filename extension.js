@@ -157,15 +157,16 @@ class PHPCBF {
         }
         let text = document.getText();
 
-        let phpcbfError = false;
-        let fileName =
-            TmpDir +
-            "/temp-" +
+        let stdoutOutput = "";
+        let fileName = path.join(
+            TmpDir,
+            "temp-" +
             Math.random()
             .toString(36)
             .replace(/[^a-z]+/g, "")
             .substr(0, 10) +
-            ".php";
+            ".php"
+        );
         fs.writeFileSync(fileName, text);
 
         let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
@@ -192,6 +193,7 @@ class PHPCBF {
                 */
                 switch (code) {
                     case 0:
+                        reject();
                         break;
                     case 1:
                     case 2:
@@ -203,7 +205,12 @@ class PHPCBF {
                         }
                         break;
                     case 3:
-                        phpcbfError = true;
+                        if (stdoutOutput.trim()) {
+                            window.showErrorMessage("PHPCBF: " + stdoutOutput.trim());
+                        } else {
+                            window.showErrorMessage("PHPCBF: general script execution errors.");
+                        }
+                        reject();
                         break;
                     default:
                         let msgs = {
@@ -221,17 +228,12 @@ class PHPCBF {
             });
         });
 
-        if (phpcbfError) {
-            exec.stdout.on("data", buffer => {
+        exec.stdout.on("data", buffer => {
+            stdoutOutput += buffer.toString();
+            if (this.debug) {
                 console.log(buffer.toString());
-                window.showErrorMessage(buffer.toString());
-            });
-        }
-        if (this.debug) {
-            exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
-            });
-        }
+            }
+        });
         exec.stderr.on("data", buffer => {
             console.log(buffer.toString());
         });
