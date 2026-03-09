@@ -26,16 +26,17 @@ This extension has the following settings:
 
 * `phpcbf.enable`: [ Optional | Default: `true` ] enable/disable this extension.
 * `phpcbf.executablePath`: [ **Required** | Default: `phpcbf` ] Can be:
-  * `${workspaceRoot}/vendor/bin/phpcbf`
+  * `${workspaceFolder}/vendor/bin/phpcbf` (or the deprecated `${workspaceRoot}`)
   * `./vendor/bin/phpcbf`
   * `~/.composer/vendor/bin/phpcbf`
   * `phpcbf.bat`
   * `/usr/local/bin/phpcbf`
   * etc
 * `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ] Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
-* `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
+* `phpcbf.onsave`: [ Optional | Default: `false` ]. Run phpcbf when saving a PHP file. Note: this only takes effect when `"editor.formatOnSave": false`; if `editor.formatOnSave` is enabled, VS Code will call the registered formatter (phpcbf) directly instead.
+* `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#coding-standards). Supports `${workspaceFolder}` variable, e.g. `"${workspaceFolder}/phpcs.xml"`.
+* `phpcbf.configSearch`: [ Optional | Default: `false` ]. When `true`, the extension searches for a `phpcs.xml`, `phpcs.xml.dist`, `.phpcs.xml`, `.phpcs.xml.dist`, `phpcs.ruleset.xml`, or `ruleset.xml` config file starting from the directory of the file being formatted and traversing up to the workspace root. The nearest config file found takes precedence over `phpcbf.standard`.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
-* `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#coding-standards).
 
 
 The default settings are
@@ -46,9 +47,12 @@ The default settings are
     "phpcbf.executablePath": "phpcbf",
     "phpcbf.documentFormattingProvider": true,
     "phpcbf.onsave": false,
-    "phpcbf.standard": null
+    "phpcbf.standard": null,
+    "phpcbf.configSearch": false
 }
 ```
+
+> **VS Code 1.61+ note:** You may need to set `"editor.defaultFormatter": "persoderlind.vscode-phpcbf"` (or the `[php]`-scoped variant) for the extension to be used when formatting PHP files.
 
 In a multi-root project, settings can be saved in `.vscode/settings.json`
 
