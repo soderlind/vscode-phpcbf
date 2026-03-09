@@ -192,6 +192,8 @@ class PHPCBF {
                 */
                 switch (code) {
                     case 0:
+                        // Nothing to fix; signal to VS Code that there are no edits.
+                        reject();
                         break;
                     case 1:
                     case 2:
@@ -204,6 +206,8 @@ class PHPCBF {
                         break;
                     case 3:
                         phpcbfError = true;
+                        // Reject so the promise does not hang indefinitely.
+                        reject();
                         break;
                     default:
                         let msgs = {
