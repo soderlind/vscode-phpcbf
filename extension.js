@@ -194,14 +194,15 @@ class PHPCBF {
                     case 0:
                         break;
                     case 1:
-                    case 2:
-                        let fixed = fs.readFileSync(fileName, "utf-8");
+                    case 2: {
+                        const fixed = fs.readFileSync(fileName, "utf-8");
                         if (fixed.length > 0) {
                             resolve(fixed);
                         } else {
                             reject();
                         }
                         break;
+                    }
                     case 3:
                         phpcbfError = true;
                         break;
