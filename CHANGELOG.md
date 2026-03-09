@@ -1,5 +1,28 @@
 # Change Log
 
+## [Unreleased] — 0.0.10
+
+### Bug Fixes
+
+* Fix formatter hang (infinite "Formatting…" spinner) when a file has no fixable errors (phpcbf exit code 0). Closes #39. _(PR #49)_
+* Fix `phpcbf.enable: false` having no effect — formatting still ran. _(PR #56)_
+* Fix temp file not being cleaned up when the phpcbf process emits an error event, preventing a resource leak. _(PR #58)_
+* Fix `onWillSaveTextDocument` listener using `executeCommand` instead of returning `TextEdit[]`, which could cause save timeouts. Closes #35. _(PR #53)_
+* Fix deprecated async `fs.exists` in `addRootPath`, replaced with `fs.existsSync`. Closes #36. _(PR #51)_
+* Fix `window.showErrorMessage` called with `undefined` when an unrecognised phpcbf exit code is received; now skipped when message is not defined. _(PR #61)_
+* Fix Windows-incompatible temp file path: use `path.join` instead of hardcoded `/` separator. _(PR #49)_
+
+### Improvements
+
+* Add VS Code output channel (`PHP Code Beautifier`) for debug logging and error display, replacing `console.log`. _(PR #50)_
+* Improve real-time phpcbf error display: stdout is now always buffered so error messages from exit code 3 are shown correctly. _(PR #49)_
+* Refactor `getArgs` to use a local variable for the coding standard, removing an unnecessary side-effect write to `this.standard`. _(PR #60)_
+* Fix `.eslintrc.json` `sourceType` from `"module"` to `"script"` (extension uses CommonJS); adopt `eslint:recommended` baseline; fix `no-case-declarations` in switch blocks.
+
+### Documentation
+
+* Document `phpcbf.configSearch`, `${workspaceFolder}` in `phpcbf.standard`, and VS Code 1.61+ requirement to set `editor.defaultFormatter`. _(PR #55)_
+
 ## 0.0.9
 * Fix crash on activation and configuration reload when no text editor is active (`window.activeTextEditor` is `null`). Closes #35, #43.
 * Reload settings per-document on every format call, so per-folder and multi-root workspace settings are respected. Closes #36.
