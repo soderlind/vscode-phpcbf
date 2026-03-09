@@ -175,6 +175,7 @@ class PHPCBF {
 
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
+                fs.unlink(fileName, function() {});
                 reject();
                 console.log(err);
                 if (err.code == "ENOENT") {
