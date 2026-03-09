@@ -78,6 +78,15 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Write phpcbf stdout to the console"
+                },
+                "phpcbf.ignorePatterns": {
+                    "scope": "resource",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "description": "A list of file path patterns to pass to phpcbf via --ignore=. Files matching these patterns will not be formatted. Example: [\"*/vendor/*\", \"*/node_modules/*\"]"
                 }
             }
         }
