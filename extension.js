@@ -278,6 +278,8 @@ class PHPCBF {
     }
 }
 
+exports.PHPCBF = PHPCBF;
+
 exports.activate = context => {
     let phpcbf = new PHPCBF();
 
