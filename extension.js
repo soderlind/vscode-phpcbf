@@ -89,10 +89,10 @@ class PHPCBF {
         }
         args.push(tmpFileName);
 
-        this.standard = this.getStandard(document);
+        const standard = this.getStandard(document);
 
-        if (this.standard) {
-            args.push("--standard=" + this.standard);
+        if (standard) {
+            args.push("--standard=" + standard);
         }
         if (this.debug) {
             console.group("PHPCBF");
