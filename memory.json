@@ -1,1 +1,18 @@
-{"last_run":"2026-03-09","run_id":"22860971918","cursor":17,"comments":{"19":"2026-03-09","39":"2026-03-09","17":"2026-03-09"},"prs":{"fixed":[35,36,38,39,43],"open_our":["exit-code-0-hang(#48)","path-join-stdout-fix"]},"next":"comment #21,#8"}
+{
+  "last_run": "2026-03-09",
+  "run_id": "22861642354",
+  "cursor": 21,
+  "comments": {
+    "19": "2026-03-09",
+    "39": "2026-03-09",
+    "17": "2026-03-09",
+    "21": "2026-03-09",
+    "8": "2026-03-09"
+  },
+  "prs": {
+    "fixed": [35, 36, 38, 39, 43],
+    "open_our": ["exit-code-0-hang(#48)", "path-join-stdout-fix(#49)", "output-channel-logging"]
+  },
+  "next": "comment #24 or investigate #28 WSL / PR #40 format-selection",
+  "notes": "PR #48 superseded by #49 - maintainer should close #48. New output-channel PR created this run."
+}
