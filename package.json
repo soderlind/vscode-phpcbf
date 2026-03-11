@@ -12,7 +12,8 @@
         "url": "https://github.com/soderlind/vscode-phpcbf.git"
     },
     "engines": {
-        "vscode": "^1.19.0"
+        "vscode": "^1.19.0",
+        "node": ">=18.0.0"
     },
     "categories": [
         "Formatters",
@@ -85,7 +86,9 @@
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test",
-        "test:unit": "node --test test/unit.test.js"
+        "test:unit": "node --test test/unit.test.js",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
     },
     "devDependencies": {
         "typescript": "^2.6.1",
