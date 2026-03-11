@@ -148,7 +148,10 @@ class PHPCBF {
             ".php";
         fs.writeFileSync(fileName, text);
 
-        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
+        // Set cwd to TmpDir so phpcs/phpcbf can write temporary diff/patch files
+        // even on macOS/Linux where the default process cwd may be read-only (e.g. "/").
+        // This fixes phpcs 2.x compatibility on macOS (see issue #16).
+        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName), { cwd: TmpDir });
         if (!this.debug) {
             exec.stdin.end();
         }
