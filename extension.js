@@ -37,7 +37,7 @@ class PHPCBF {
             process.platform == "win32" ? "php-cbf.bat" : "phpcbf"
         );
 
-        this.configSearch = config.get("configSearch", false);
+        this.configSearch = config.get("configSearch", true);
 
         /**
          * relative paths?
