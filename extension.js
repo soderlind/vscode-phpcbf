@@ -295,6 +295,9 @@ exports.activate = context => {
         context.subscriptions.push(
             languages.registerDocumentFormattingEditProvider("php", {
                 provideDocumentFormattingEdits: (document, options, token) => {
+                    if (token.isCancellationRequested) {
+                        return Promise.resolve([]);
+                    }
                     return new Promise((resolve, reject) => {
                         const originalText = document.getText();
                         let lastLine = document.lineAt(document.lineCount - 1);
@@ -302,9 +305,18 @@ exports.activate = context => {
                             new Position(0, 0),
                             lastLine.range.end
                         );
+                        const cancellationListener = token.onCancellationRequested(() => {
+                            cancellationListener.dispose();
+                            reject();
+                        });
                         phpcbf
                             .format(document)
                             .then(text => {
+                                cancellationListener.dispose();
+                                if (token.isCancellationRequested) {
+                                    reject();
+                                    return;
+                                }
                                 if (text != originalText) {
                                     resolve([new vscode.TextEdit(range, text)]);
                                 } else {
@@ -312,6 +324,7 @@ exports.activate = context => {
                                 }
                             })
                             .catch(err => {
+                                cancellationListener.dispose();
                                 console.log(err);
                                 reject();
                             });
