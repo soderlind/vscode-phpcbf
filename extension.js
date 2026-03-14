@@ -161,6 +161,8 @@ class PHPCBF {
                     window.showErrorMessage(
                         "PHPCBF: " + err.message + ". executablePath not found."
                     );
+                } else {
+                    window.showErrorMessage("PHPCBF: " + err.message);
                 }
             });
             exec.on("exit", code => {
