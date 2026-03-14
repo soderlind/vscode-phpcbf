@@ -43,8 +43,8 @@
                 "phpcbf.configSearch": {
                     "scope": "resource",
                     "type": "boolean",
-                    "default": false,
-                    "description": "Search for phpcs configuration files in the workspace."
+                    "default": true,
+                    "description": "Search for phpcs configuration files (phpcs.xml, .phpcs.xml, phpcs.xml.dist, ruleset.xml, etc.) in the workspace, starting from the file being formatted and walking up to the workspace root. When a config file is found it is passed to phpcbf as --standard, taking precedence over phpcbf.standard. Set to false to disable auto-discovery and rely solely on phpcbf.standard."
                 },
                 "phpcbf.standard": {
                     "scope": "resource",

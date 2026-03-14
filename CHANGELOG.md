@@ -1,5 +1,8 @@
 # Change Log
 
+## Unreleased
+* Default `phpcbf.configSearch` to `true` so phpcs.xml / .phpcs.xml / phpcs.xml.dist / ruleset.xml files are discovered automatically. Users who set `phpcbf.standard` explicitly and do **not** want workspace config files to override it should set `phpcbf.configSearch: false`. Closes #17.
+
 ## 0.0.9
 * Fix crash on activation and configuration reload when no text editor is active (`window.activeTextEditor` is `null`). Closes #35, #43.
 * Reload settings per-document on every format call, so per-folder and multi-root workspace settings are respected. Closes #36.
