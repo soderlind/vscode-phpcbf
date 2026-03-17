@@ -103,4 +103,18 @@ describe("findFiles", () => {
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
     });
+
+    test("returns null when directory resolves outside parent (no workspace escape)", () => {
+        // Simulates a file opened from outside the workspace, where
+        // path.relative(workspaceRoot, filePath) produces "../../outside".
+        // findFiles must NOT search outside the parent boundary.
+        mkFile("outside-config.xml");  // exists above the workspace root
+        mkDir("workspace");
+        const result = findFiles(
+            path.join(tmpRoot, "workspace"),
+            path.join("..", ".."),  // escapes tmpRoot/workspace
+            "outside-config.xml"
+        );
+        assert.equal(result, null);
+    });
 });
