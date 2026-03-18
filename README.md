@@ -71,6 +71,62 @@ If you add a standard to phpcs, it will be available for phpcbf. Some popular st
 You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
 
 
+## Troubleshooting
+
+### Extension does nothing / no output in the debug console
+
+1. **Check the executable path.** Open the VS Code Output panel (`View › Output`) and choose the *Extension Host* channel. A message like `PHPCBF: … executablePath not found` means the path configured in `phpcbf.executablePath` cannot be found. Set it to the absolute path of your `phpcbf` binary (e.g. `which phpcbf` on Linux/macOS or `where phpcbf.bat` on Windows).
+2. **Enable debug mode.** Add `"phpcbf.debug": true` to your settings, then save a PHP file. The command and arguments will be printed to the Output panel so you can see what is being invoked.
+3. **Reload the extension host.** After changing settings, run the *Developer: Reload Window* command to ensure the new values take effect.
+4. **Language check.** The extension only activates for files recognised as PHP by VS Code. Confirm that the status bar shows `PHP` as the file language.
+
+### `phpcbf.onsave` is not formatting on save
+
+VS Code's built-in `"editor.formatOnSave"` takes precedence when it is set to `true`. The extension's own `phpcbf.onsave` option is intended as a fallback for when `editor.formatOnSave` is `false`. To format on save, use either:
+
+```json
+{
+  "[php]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "persoderlind.vscode-phpcbf"
+  }
+}
+```
+
+or keep `editor.formatOnSave` set to `false` and use `"phpcbf.onsave": true` instead.
+
+### "There is no formatter for 'PHP' files installed" / formatter not selected
+
+VS Code requires an explicit default formatter when more than one formatting provider is registered. Add the following to your `settings.json`:
+
+```json
+{
+  "[php]": {
+    "editor.defaultFormatter": "persoderlind.vscode-phpcbf"
+  }
+}
+```
+
+Alternatively open a PHP file, press `Shift+Alt+F` and choose **Configure Default Formatter** from the prompt.
+
+### Coding standard not found
+
+If you see `ERROR: the "…" coding standard is not installed`, check:
+
+* The `phpcbf.standard` value is spelled correctly and phpcs can find it (`phpcs -i` lists installed standards).
+* If you are pointing to a rules file, use an absolute path or `${workspaceFolder}/phpcs.xml`.
+* If different sub-directories use different standards, enable `"phpcbf.configSearch": true` so the extension auto-discovers the nearest `phpcs.xml` / `.phpcs.xml` file.
+
+### Relative `executablePath` stops working after VS Code restarts
+
+The extension resolves relative paths (starting with `./`, `${workspaceFolder}`, or `~`) at load time. If the path resolves correctly the first time but not after a restart, it usually means the extension is loading before the workspace folders are available. Use an absolute path as a workaround, or prefix with `${workspaceFolder}`:
+
+```json
+{
+  "phpcbf.executablePath": "${workspaceFolder}/vendor/bin/phpcbf"
+}
+```
+
 ## Known Issues
 
 None, but this is my first vscode extension, you're warned :)
