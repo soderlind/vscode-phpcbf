@@ -62,14 +62,23 @@ class PHPCBF {
 
         this.standard = config.get("standard", null);
 
-        // Resolve ${workspaceFolder} / ${workspaceRoot} in the standard path.
-        if (this.standard && configUri) {
-            const folder = workspace.getWorkspaceFolder(configUri);
-            const rootPath = folder ? folder.uri.fsPath : null;
-            if (rootPath) {
-                this.standard = this.standard
-                    .replace("${workspaceFolder}", rootPath)
-                    .replace("${workspaceRoot}", rootPath);
+        // Resolve variable tokens and relative paths in the standard setting.
+        if (this.standard) {
+            if (this.standard.startsWith("~")) {
+                this.standard = this.standard.replace(/^~\//, os.homedir() + "/");
+            }
+            if (configUri) {
+                const folder = workspace.getWorkspaceFolder(configUri);
+                const rootPath = folder ? folder.uri.fsPath : null;
+                if (rootPath) {
+                    this.standard = this.standard
+                        .replace("${workspaceFolder}", rootPath)
+                        .replace("${workspaceRoot}", rootPath);
+                    // Resolve relative paths (e.g. ./ruleset.xml) against the workspace root.
+                    if (this.standard.startsWith(".")) {
+                        this.standard = path.resolve(rootPath, this.standard);
+                    }
+                }
             }
         }
 
@@ -137,30 +146,36 @@ class PHPCBF {
         }
         let text = document.getText();
 
-        let phpcbfError = false;
-        let fileName =
-            TmpDir +
-            "/temp-" +
+        let stdoutOutput = "";
+        let fileName = path.join(
+            TmpDir,
+            "temp-" +
             Math.random()
             .toString(36)
             .replace(/[^a-z]+/g, "")
             .substr(0, 10) +
-            ".php";
+            ".php"
+        );
         fs.writeFileSync(fileName, text);
 
-        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
-        if (!this.debug) {
-            exec.stdin.end();
-        }
+        // Set cwd to TmpDir so phpcs/phpcbf can write temporary diff/patch files
+        // even on macOS/Linux where the default process cwd may be read-only.
+        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName), { cwd: TmpDir });
+        // Always close stdin — phpcbf processes a temp file passed as an argument
+        // and does not need stdin. Leaving it open caused hangs on some phpcbf builds.
+        exec.stdin.end();
 
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
+                fs.unlink(fileName, function() {});
                 reject();
                 console.log(err);
                 if (err.code == "ENOENT") {
                     window.showErrorMessage(
                         "PHPCBF: " + err.message + ". executablePath not found."
                     );
+                } else {
+                    window.showErrorMessage("PHPCBF: " + err.message);
                 }
             });
             exec.on("exit", code => {
@@ -172,9 +187,11 @@ class PHPCBF {
                 */
                 switch (code) {
                     case 0:
+                        // Nothing to fix — resolve so the provider returns cleanly with no edits.
+                        reject();
                         break;
                     case 1:
-                    case 2:
+                    case 2: {
                         let fixed = fs.readFileSync(fileName, "utf-8");
                         if (fixed.length > 0) {
                             resolve(fixed);
@@ -182,41 +199,43 @@ class PHPCBF {
                             reject();
                         }
                         break;
+                    }
                     case 3:
-                        phpcbfError = true;
+                        window.showErrorMessage(
+                            stdoutOutput.trim()
+                                ? "PHPCBF: " + stdoutOutput.trim()
+                                : "PHPCBF: general script execution errors."
+                        );
+                        reject();
                         break;
-                    default:
-                        let msgs = {
-                            3: "PHPCBF: general script execution errors.",
+                    default: {
+                        const msgs = {
                             16: "PHPCBF: Configuration error of the application.",
                             32: "PHPCBF: Configuration error of a Fixer.",
                             64: "PHPCBF: Exception raised within the application."
                         };
-                        window.showErrorMessage(msgs[code]);
+                        window.showErrorMessage(
+                            msgs[code] || "PHPCBF: Unexpected exit code " + code + "."
+                        );
                         reject();
                         break;
+                    }
                 }
 
                 fs.unlink(fileName, function (err) {});
             });
         });
 
-        if (phpcbfError) {
-            exec.stdout.on("data", buffer => {
+        exec.stdout.on("data", buffer => {
+            stdoutOutput += buffer.toString();
+            if (this.debug) {
                 console.log(buffer.toString());
-                window.showErrorMessage(buffer.toString());
-            });
-        }
-        if (this.debug) {
-            exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
-            });
-        }
+            }
+        });
         exec.stderr.on("data", buffer => {
             console.log(buffer.toString());
         });
         exec.on("close", code => {
-            // console.log(code);
             if (this.debug) {
                 console.timeEnd("phpcbf");
                 console.groupEnd();
@@ -247,11 +266,9 @@ class PHPCBF {
                         prefix,
                         rootPath
                     );
-                    fs.exists(tmpExecutablePath, exists => {
-                        if (exists) {
-                            this.executablePath = tmpExecutablePath;
-                        }
-                    });
+                    if (fs.existsSync(tmpExecutablePath)) {
+                        this.executablePath = tmpExecutablePath;
+                    }
                 }
             }
         }
@@ -263,9 +280,14 @@ exports.activate = context => {
 
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
+            // Read phpcbf.onsave scoped to this document's URI so that
+            // per-folder settings in multi-root workspaces are respected.
+            const onsave = workspace
+                .getConfiguration("phpcbf", event.document.uri)
+                .get("onsave", false);
             if (
                 event.document.languageId == "php" &&
-                phpcbf.onsave &&
+                onsave &&
                 workspace
                 .getConfiguration("editor", event.document.uri)
                 .get("formatOnSave") === false
@@ -286,8 +308,10 @@ exports.activate = context => {
     );
 
     context.subscriptions.push(
-        workspace.onDidChangeConfiguration(() => {
-            phpcbf.loadSettings();
+        workspace.onDidChangeConfiguration(event => {
+            if (event.affectsConfiguration("phpcbf")) {
+                phpcbf.loadSettings();
+            }
         })
     );
 
@@ -308,12 +332,16 @@ exports.activate = context => {
                                 if (text != originalText) {
                                     resolve([new vscode.TextEdit(range, text)]);
                                 } else {
-                                    reject();
+                                    // phpcbf ran but produced identical output — no edits needed.
+                                    resolve([]);
                                 }
                             })
-                            .catch(err => {
-                                console.log(err);
-                                reject();
+                            .catch(() => {
+                                // phpcbf had nothing to fix (exit 0) or encountered an error.
+                                // Errors are surfaced via window.showErrorMessage() inside format();
+                                // here we resolve with no edits to avoid a spurious VS Code
+                                // "Formatter failed" notification.
+                                resolve([]);
                             });
                     });
                 }
