@@ -103,4 +103,48 @@ describe("findFiles", () => {
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
     });
+
+    test("returns null when names array is empty", () => {
+        mkDir("empty-names");
+        const result = findFiles(path.join(tmpRoot, "empty-names"), ".", []);
+        assert.equal(result, null);
+    });
+
+    test("finds file when directory is empty string (resolves to parent)", () => {
+        const expected = mkFile("empty-dir-str", "phpcs.xml");
+        // path.resolve(parent, "") === parent, so the search starts at parent
+        const result = findFiles(path.join(tmpRoot, "empty-dir-str"), "", "phpcs.xml");
+        assert.equal(result, expected);
+    });
+
+    test("returns null when directory is empty string and file does not exist", () => {
+        mkDir("empty-dir-miss");
+        const result = findFiles(path.join(tmpRoot, "empty-dir-miss"), "", "nonexistent.xml");
+        assert.equal(result, null);
+    });
+
+    test("matches first name in array when multiple names present", () => {
+        mkDir("first-match");
+        const first = mkFile("first-match", ".phpcs.xml");
+        mkFile("first-match", "phpcs.xml");
+        const result = findFiles(
+            path.join(tmpRoot, "first-match"),
+            ".",
+            [".phpcs.xml", "phpcs.xml"]
+        );
+        // findFiles checks names in order; .phpcs.xml appears first
+        assert.equal(result, first);
+    });
+
+    test("falls through to second name when first name is not found", () => {
+        mkDir("second-match");
+        const second = mkFile("second-match", "phpcs.xml");
+        // Only phpcs.xml exists — .phpcs.xml does not
+        const result = findFiles(
+            path.join(tmpRoot, "second-match"),
+            ".",
+            [".phpcs.xml", "phpcs.xml"]
+        );
+        assert.equal(result, second);
+    });
 });

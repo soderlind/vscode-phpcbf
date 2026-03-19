@@ -258,6 +258,9 @@ class PHPCBF {
     }
 }
 
+// Exported for unit testing.
+exports.PHPCBF = PHPCBF;
+
 exports.activate = context => {
     let phpcbf = new PHPCBF();
 
