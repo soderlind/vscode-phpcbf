@@ -292,30 +292,46 @@ exports.activate = context => {
     );
 
     if (phpcbf.documentFormattingProvider) {
+        // Shared helper: run phpcbf on the full document and return TextEdits.
+        const getFullDocumentEdits = (document) => {
+            return new Promise((resolve, reject) => {
+                const originalText = document.getText();
+                let lastLine = document.lineAt(document.lineCount - 1);
+                let range = new Range(
+                    new Position(0, 0),
+                    lastLine.range.end
+                );
+                phpcbf
+                    .format(document)
+                    .then(text => {
+                        if (text != originalText) {
+                            resolve([new vscode.TextEdit(range, text)]);
+                        } else {
+                            reject();
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        reject();
+                    });
+            });
+        };
+
         context.subscriptions.push(
             languages.registerDocumentFormattingEditProvider("php", {
                 provideDocumentFormattingEdits: (document, options, token) => {
-                    return new Promise((resolve, reject) => {
-                        const originalText = document.getText();
-                        let lastLine = document.lineAt(document.lineCount - 1);
-                        let range = new Range(
-                            new Position(0, 0),
-                            lastLine.range.end
-                        );
-                        phpcbf
-                            .format(document)
-                            .then(text => {
-                                if (text != originalText) {
-                                    resolve([new vscode.TextEdit(range, text)]);
-                                } else {
-                                    reject();
-                                }
-                            })
-                            .catch(err => {
-                                console.log(err);
-                                reject();
-                            });
-                    });
+                    return getFullDocumentEdits(document);
+                }
+            })
+        );
+
+        // Register a range formatting provider so that VS Code's
+        // editor.formatOnPaste works. phpcbf always operates on the full
+        // document, so the range is ignored and the full document is fixed.
+        context.subscriptions.push(
+            languages.registerDocumentRangeFormattingEditProvider("php", {
+                provideDocumentRangeFormattingEdits: (document, range, options, token) => {
+                    return getFullDocumentEdits(document);
                 }
             })
         );
