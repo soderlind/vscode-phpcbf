@@ -261,6 +261,39 @@ class PHPCBF {
 exports.activate = context => {
     let phpcbf = new PHPCBF();
 
+    // Status bar item: gives users immediate visual confirmation that the
+    // extension is active, and surfaces transient warnings on format failure.
+    const statusBarItem = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment.Right,
+        100
+    );
+    statusBarItem.text = "$(check) phpcbf";
+    statusBarItem.tooltip = "PHP Code Beautifier and Fixer is ready";
+    context.subscriptions.push(statusBarItem);
+
+    // Show the item only when a PHP file is in the active editor.
+    function updateStatusBarVisibility(editor) {
+        if (editor && editor.document.languageId === "php") {
+            statusBarItem.show();
+        } else {
+            statusBarItem.hide();
+        }
+    }
+    context.subscriptions.push(
+        window.onDidChangeActiveTextEditor(updateStatusBarVisibility)
+    );
+    updateStatusBarVisibility(window.activeTextEditor);
+
+    // Briefly flash a warning in the status bar, then restore the ready state.
+    function showStatusWarning(message) {
+        statusBarItem.text = "$(warning) phpcbf";
+        statusBarItem.tooltip = message;
+        setTimeout(() => {
+            statusBarItem.text = "$(check) phpcbf";
+            statusBarItem.tooltip = "PHP Code Beautifier and Fixer is ready";
+        }, 4000);
+    }
+
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
             if (
@@ -313,6 +346,9 @@ exports.activate = context => {
                             })
                             .catch(err => {
                                 console.log(err);
+                                showStatusWarning(
+                                    "PHPCBF: format failed — enable phpcbf.debug for details"
+                                );
                                 reject();
                             });
                     });
