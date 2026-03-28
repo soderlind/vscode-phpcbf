@@ -1,1 +1,1 @@
-{"r":"23662415322","d":"2026-03-27","cur":46,"m":46,"n":"AllOK.PR110perf-async-io.AllPRsClean.NoNewIssueActivity.","prs":["fix-critical-bugs-2026-03-25","test-phpcbf-class-2026-03-25","improve-eslintrc-2026-03-26","perf-async-file-io-2026-03-27"]}
+{"r":"23673791231","d":"2026-03-28","cur":46,"prs":["fix-critical-bugs-2026-03-25","test-phpcbf-class-2026-03-25","improve-eslintrc-2026-03-26","perf-async-file-io-2026-03-27","test-findfiles-escape-bug-2026-03-28"]}
