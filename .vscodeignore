@@ -1,7 +1,11 @@
 .vscode/**
 .vscode-test/**
+.github/**
 test/**
+node_modules/**
 .gitignore
+.gitattributes
 jsconfig.json
 vsc-extension-quickstart.md
 .eslintrc.json
+images/phpcbf-preview.gif
