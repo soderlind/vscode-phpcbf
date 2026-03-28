@@ -103,4 +103,34 @@ describe("findFiles", () => {
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
     });
+
+    // Regression test: findFiles should never return a file above the `parent`
+    // boundary, even when `directory` is a relative path (e.g. "..") that
+    // resolves outside `parent`.  On unpatched code this test fails; it passes
+    // once PR #94 ("fix: prevent findFiles from escaping parent") is merged.
+    test(
+        "does not escape parent when directory is a relative path above workspace root",
+        { todo: "Known bug — fixed by PR #94; marks expected failure until merged" },
+        () => {
+            // Place a config file at tmpRoot level (above the workspace root).
+            const aboveParent = mkFile("relative-escape-sentinel.xml");
+
+            // workspace root is one level below tmpRoot
+            mkDir("ws-escape");
+
+            // directory = ".." resolves to tmpRoot, which is *above* parent
+            const result = findFiles(
+                path.join(tmpRoot, "ws-escape"), // parent (workspace root)
+                "..",                             // resolves to tmpRoot — above parent
+                "relative-escape-sentinel.xml"
+            );
+
+            // Must NOT escape above parent — should return null
+            assert.equal(
+                result,
+                null,
+                `findFiles escaped parent boundary and returned ${result}`
+            );
+        }
+    );
 });
