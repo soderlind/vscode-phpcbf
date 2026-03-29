@@ -27,7 +27,8 @@ class PHPCBF {
             (window.activeTextEditor ? window.activeTextEditor.document.uri : null);
 
         let config = workspace.getConfiguration("phpcbf", configUri);
-        if (!config.get("enable") === true) {
+        this.enabled = config.get("enable", true);
+        if (!this.enabled) {
             return;
         }
         this.onsave = config.get("onsave", false);
@@ -131,6 +132,11 @@ class PHPCBF {
         // Reload settings scoped to this document so multi-root workspaces and
         // per-folder settings are respected on every format call.
         this.loadSettings(document.uri);
+
+        if (!this.enabled) {
+            // phpcbf.enable is false for this resource — do nothing.
+            return Promise.reject();
+        }
 
         if (this.debug) {
             console.time("phpcbf");
