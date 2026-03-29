@@ -1,1 +1,1 @@
-{"r":"23709449521","d":"2026-03-29","cur":46,"pr":114,"dup":"PR#114 dupes PR#56 (enable fix)"}
+{"r":"23716429433","d":"2026-03-29","cur":46,"m":46,"n":"AllOK.PR115perf-settings-cache.AllPRsClean.","prs":["fix-critical-bugs-2026-03-25","test-phpcbf-class-2026-03-25","improve-eslintrc-2026-03-26","perf-settings-cache-2026-03-29"]}
