@@ -103,4 +103,32 @@ describe("findFiles", () => {
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
     });
+
+    test("returns first matching name when multiple config files exist in same directory", () => {
+        // When both .phpcs.xml and phpcs.xml exist, .phpcs.xml (first in the
+        // names array) should be returned — matching PHPCS priority rules.
+        mkFile("priority", "sub", ".phpcs.xml");
+        mkFile("priority", "sub", "phpcs.xml");
+        const result = findFiles(
+            path.join(tmpRoot, "priority"),
+            "sub",
+            [".phpcs.xml", "phpcs.xml", "phpcs.xml.dist"]
+        );
+        assert.equal(result, path.join(tmpRoot, "priority", "sub", ".phpcs.xml"));
+    });
+
+    test("prefers file in deeper directory over ancestor when names overlap", () => {
+        // Both the workspace root and a sub-directory contain phpcs.xml.
+        // The deepest match should be returned because we search from deepest upward.
+        mkFile("deeperwin", "phpcs.xml");                       // at root
+        const deeper = mkFile("deeperwin", "a", "phpcs.xml");  // in sub-dir
+        const result = findFiles(path.join(tmpRoot, "deeperwin"), "a", "phpcs.xml");
+        assert.equal(result, deeper);
+    });
+
+    test("returns null for empty names array", () => {
+        mkDir("emptynames", "sub");
+        const result = findFiles(path.join(tmpRoot, "emptynames"), "sub", []);
+        assert.equal(result, null);
+    });
 });
