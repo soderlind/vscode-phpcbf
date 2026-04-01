@@ -38,13 +38,13 @@
                     "scope": "resource",
                     "type": "string",
                     "default": "phpcbf",
-                    "description": "Points to the phpcbf exectuable, eg: win: phpcbf.bat, other: phpcbf"
+                    "description": "Path to the phpcbf executable. Examples: 'phpcbf' (if on PATH), '/usr/local/bin/phpcbf', '${workspaceFolder}/vendor/bin/phpcbf', '~/bin/phpcbf'. On Windows use 'phpcbf.bat'."
                 },
                 "phpcbf.configSearch": {
                     "scope": "resource",
                     "type": "boolean",
                     "default": false,
-                    "description": "Search for phpcs configuration files in the workspace."
+                    "description": "When true, automatically searches for a phpcs configuration file (.phpcs.xml, phpcs.xml, phpcs.xml.dist, ruleset.xml, etc.) in the file's directory and up to the workspace root, and uses it as the coding standard. Takes precedence over phpcbf.standard when a config file is found."
                 },
                 "phpcbf.standard": {
                     "scope": "resource",
@@ -53,7 +53,7 @@
                         "null"
                     ],
                     "default": null,
-                    "description": "null, PSR1, PSR2, Symfony, WordPress etc. You can also point to a phpcs.xml rules file, eg: /file/path/phpcs.xml"
+                    "description": "Coding standard to pass to phpcbf via --standard. Examples: PSR2, PSR12, WordPress, Symfony, or a path to a phpcs.xml file. Supports ${workspaceFolder}/phpcs.xml, ${workspaceRoot}/phpcs.xml (deprecated), ~/standards/MyStandard, and relative paths like ./phpcs.xml."
                 },
                 "phpcbf.onsave": {
                     "scope": "resource",
