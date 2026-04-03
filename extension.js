@@ -153,8 +153,23 @@ class PHPCBF {
             exec.stdin.end();
         }
 
+        // Kill the subprocess if it does not exit within 30 seconds. This
+        // prevents VS Code from hanging indefinitely when phpcbf stalls
+        // (e.g. waiting for stdin on a misconfigured build, or processing an
+        // unusually large file). The timeout is cleared on normal exit.
+        const TIMEOUT_MS = 30000;
+        let killTimer = setTimeout(() => {
+            exec.kill();
+            fs.unlink(fileName, function() {});
+            window.showErrorMessage(
+                "PHPCBF: timed out after " + (TIMEOUT_MS / 1000) + " s. " +
+                "Check executablePath and that phpcbf can run on this file."
+            );
+        }, TIMEOUT_MS);
+
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
+                clearTimeout(killTimer);
                 reject();
                 console.log(err);
                 if (err.code == "ENOENT") {
@@ -164,6 +179,7 @@ class PHPCBF {
                 }
             });
             exec.on("exit", code => {
+                clearTimeout(killTimer);
                 /*  phpcbf exit codes:
                 Exit code 0 is used to indicate that no fixable errors were found, so nothing was fixed
                 Exit code 1 is used to indicate that all fixable errors were fixed correctly
