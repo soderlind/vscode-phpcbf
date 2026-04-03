@@ -1,1 +1,12 @@
+# Normalise all text files to LF in the repository (prevents CRLF/LF noise
+# in diffs when contributors work on Windows and macOS/Linux together).
+* text=auto eol=lf
+
+# Explicit overrides for specific types
+*.bat text eol=crlf
+*.png binary
+*.gif binary
+*.ico binary
+
+# Repo Assist workflow lock — keep as-is and mark generated
 .github/workflows/*.lock.yml linguist-generated=true merge=ours
