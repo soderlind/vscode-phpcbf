@@ -263,15 +263,33 @@ exports.activate = context => {
 
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
+            // Read phpcbf.onsave scoped to this document's URI so that
+            // per-folder settings in multi-root workspaces are respected.
+            const onsave = workspace
+                .getConfiguration("phpcbf", event.document.uri)
+                .get("onsave", false);
             if (
                 event.document.languageId == "php" &&
-                phpcbf.onsave &&
+                onsave &&
                 workspace
                 .getConfiguration("editor", event.document.uri)
                 .get("formatOnSave") === false
             ) {
+                // Pass TextEdit[] directly to waitUntil so edits are applied
+                // atomically as part of the save — the correct VS Code API
+                // contract for onWillSaveTextDocument.  Using
+                // commands.executeCommand("editor.action.formatDocument") would
+                // format the *active* editor rather than event.document, which
+                // is wrong when a background document is saved.
                 event.waitUntil(
-                    commands.executeCommand("editor.action.formatDocument")
+                    phpcbf.format(event.document).then(text => {
+                        const lastLine = event.document.lineAt(event.document.lineCount - 1);
+                        const range = new Range(
+                            new Position(0, 0),
+                            lastLine.range.end
+                        );
+                        return [new vscode.TextEdit(range, text)];
+                    }).catch(() => [])
                 );
             }
         })
