@@ -12,7 +12,8 @@
         "url": "https://github.com/soderlind/vscode-phpcbf.git"
     },
     "engines": {
-        "vscode": "^1.19.0"
+        "vscode": "^1.19.0",
+        "node": ">=18"
     },
     "categories": [
         "Formatters",
