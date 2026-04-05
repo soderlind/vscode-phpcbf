@@ -10,7 +10,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 
-const { findFiles } = require("../lib/utils");
+const { findFiles, diffRegion } = require("../lib/utils");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -104,3 +104,85 @@ describe("findFiles", () => {
         assert.equal(result, expected);
     });
 });
+
+// ---------------------------------------------------------------------------
+// diffRegion
+// ---------------------------------------------------------------------------
+
+describe("diffRegion", () => {
+    test("returns null for identical strings", () => {
+        assert.equal(diffRegion("hello\nworld\n", "hello\nworld\n"), null);
+    });
+
+    test("returns null for two empty strings", () => {
+        assert.equal(diffRegion("", ""), null);
+    });
+
+    test("covers a single-character change in the middle", () => {
+        const orig = "hello world";
+        const fmt  = "hello World";
+        const r = diffRegion(orig, fmt);
+        assert.ok(r, "expected a region");
+        assert.equal(r.start, 6);           // 'W' vs 'w'
+        assert.equal(r.origEnd, 7);
+        assert.equal(r.fmtEnd,  7);
+        assert.equal(orig.slice(r.start, r.origEnd), "w");
+        assert.equal(fmt.slice(r.start, r.fmtEnd),   "W");
+    });
+
+    test("covers a change at the very beginning", () => {
+        const orig = "abc";
+        const fmt  = "Abc";
+        const r = diffRegion(orig, fmt);
+        assert.ok(r);
+        assert.equal(r.start,   0);
+        assert.equal(r.origEnd, 1);
+        assert.equal(r.fmtEnd,  1);
+    });
+
+    test("covers a change at the very end", () => {
+        const orig = "abcX";
+        const fmt  = "abcY";
+        const r = diffRegion(orig, fmt);
+        assert.ok(r);
+        assert.equal(r.start,   3);
+        assert.equal(r.origEnd, 4);
+        assert.equal(r.fmtEnd,  4);
+    });
+
+    test("handles inserted characters (formatted is longer)", () => {
+        const orig = "line1\nline3\n";
+        const fmt  = "line1\nline2\nline3\n";
+        const r = diffRegion(orig, fmt);
+        assert.ok(r, "expected a region");
+        // Applying the region must reproduce fmt exactly
+        assert.equal(
+            orig.slice(0, r.start) + fmt.slice(r.start, r.fmtEnd) + orig.slice(r.origEnd),
+            fmt
+        );
+        // The region must not include any unchanged prefix (start > 0 because "line1\nline" matches)
+        assert.ok(r.start > 0, "shared prefix should be excluded from region");
+    });
+
+    test("handles deleted characters (formatted is shorter)", () => {
+        const orig = "line1\nline2\nline3\n";
+        const fmt  = "line1\nline3\n";
+        const r = diffRegion(orig, fmt);
+        assert.ok(r, "expected a region");
+        assert.equal(
+            orig.slice(0, r.start) + fmt.slice(r.start, r.fmtEnd) + orig.slice(r.origEnd),
+            fmt
+        );
+        assert.ok(r.start > 0, "shared prefix should be excluded from region");
+    });
+
+    test("the replacement is minimal — unchanged suffix is excluded", () => {
+        const orig = "<?php\n$x = 1;\n$y = 2;\n";
+        const fmt  = "<?php\n$x=1;\n$y = 2;\n";
+        const r = diffRegion(orig, fmt);
+        assert.ok(r);
+        // The shared suffix "$y = 2;\n" must NOT be inside the region
+        assert.ok(r.origEnd <= orig.indexOf("$y"), "suffix should be outside region");
+    });
+});
+
