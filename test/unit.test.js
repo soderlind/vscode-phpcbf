@@ -103,4 +103,39 @@ describe("findFiles", () => {
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
     });
+
+    // Verify that the PHPCS auto-detection priority is respected:
+    // .phpcs.xml > phpcs.xml > .phpcs.xml.dist > phpcs.xml.dist
+    test("PHPCS priority: .phpcs.xml beats phpcs.xml when both exist", () => {
+        const expected = mkFile("priority1", "src", ".phpcs.xml");
+        mkFile("priority1", "src", "phpcs.xml");
+        const result = findFiles(
+            path.join(tmpRoot, "priority1"),
+            "src",
+            [".phpcs.xml", "phpcs.xml", ".phpcs.xml.dist", "phpcs.xml.dist"]
+        );
+        assert.equal(result, expected);
+    });
+
+    test("PHPCS priority: phpcs.xml beats .phpcs.xml.dist when both exist", () => {
+        const expected = mkFile("priority2", "src", "phpcs.xml");
+        mkFile("priority2", "src", ".phpcs.xml.dist");
+        const result = findFiles(
+            path.join(tmpRoot, "priority2"),
+            "src",
+            [".phpcs.xml", "phpcs.xml", ".phpcs.xml.dist", "phpcs.xml.dist"]
+        );
+        assert.equal(result, expected);
+    });
+
+    test("PHPCS priority: .phpcs.xml.dist beats phpcs.xml.dist when both exist", () => {
+        const expected = mkFile("priority3", "src", ".phpcs.xml.dist");
+        mkFile("priority3", "src", "phpcs.xml.dist");
+        const result = findFiles(
+            path.join(tmpRoot, "priority3"),
+            "src",
+            [".phpcs.xml", "phpcs.xml", ".phpcs.xml.dist", "phpcs.xml.dist"]
+        );
+        assert.equal(result, expected);
+    });
 });

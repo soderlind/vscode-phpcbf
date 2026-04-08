@@ -111,8 +111,10 @@ class PHPCBF {
         const workspaceRoot = folder ? folder.uri.fsPath : null;
         const filePath = document.fileName;
         if (this.configSearch && workspaceRoot !== null && filePath !== undefined) {
+            // Priority matches PHP_CodeSniffer's own auto-detection order:
+            // https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/src/Config.php
             const confFileNames = [
-                '.phpcs.xml', '.phpcs.xml.dist', 'phpcs.xml', 'phpcs.xml.dist',
+                '.phpcs.xml', 'phpcs.xml', '.phpcs.xml.dist', 'phpcs.xml.dist',
                 'phpcs.ruleset.xml', 'ruleset.xml',
             ];
 
