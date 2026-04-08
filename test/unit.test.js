@@ -98,6 +98,19 @@ describe("findFiles", () => {
         assert.equal(result, null);
     });
 
+    test("returns null when directory is outside parent (simulated cross-drive path)", () => {
+        // Simulate what happens when path.relative() returns an absolute path
+        // (e.g. Windows cross-drive: path.relative("C:\\ws", "D:\\other") -> "D:\\other").
+        // findFiles should return null immediately without walking outside parent.
+        mkFile("outside-guard", "phpcs.xml");
+        // Pass an absolute path as `directory` that is not within parent.
+        const outsideDir = path.join(tmpRoot, "outside-guard");
+        const unrelatedParent = path.join(tmpRoot, "unrelated-parent");
+        fs.mkdirSync(unrelatedParent, { recursive: true });
+        const result = findFiles(unrelatedParent, outsideDir, "phpcs.xml");
+        assert.equal(result, null);
+    });
+
     test("handles a single-segment directory (file at root)", () => {
         const expected = mkFile("single", "phpcs.xml");
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
