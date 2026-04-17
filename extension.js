@@ -243,15 +243,14 @@ class PHPCBF {
                 const folder = workspace.getWorkspaceFolder(resource);
                 if (folder) {
                     const rootPath = folder.uri.fsPath;
-                    let tmpExecutablePath = this.executablePath.replace(
+                    const tmpExecutablePath = this.executablePath.replace(
                         prefix,
                         rootPath
                     );
-                    fs.exists(tmpExecutablePath, exists => {
-                        if (exists) {
-                            this.executablePath = tmpExecutablePath;
-                        }
-                    });
+                    if (fs.existsSync(tmpExecutablePath)) {
+                        this.executablePath = tmpExecutablePath;
+                        return;
+                    }
                 }
             }
         }
