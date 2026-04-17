@@ -4,8 +4,13 @@
         "target": "es6",
         "lib": [
             "es6"
-        ]
+        ],
+        "checkJs": true
     },
+    "include": [
+        "extension.js",
+        "lib/**/*.js"
+    ],
     "exclude": [
         "node_modules"
     ]
