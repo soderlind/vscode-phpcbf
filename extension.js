@@ -79,6 +79,8 @@ class PHPCBF {
         );
 
         this.debug = config.get("debug", false);
+
+        this.ignorePatterns = config.get("ignorePatterns", []);
     }
 
     getArgs(document, tmpFileName) {
@@ -94,6 +96,9 @@ class PHPCBF {
 
         if (this.standard) {
             args.push("--standard=" + this.standard);
+        }
+        if (this.ignorePatterns && this.ignorePatterns.length > 0) {
+            args.push("--ignore=" + this.ignorePatterns.join(","));
         }
         if (this.debug) {
             console.group("PHPCBF");
