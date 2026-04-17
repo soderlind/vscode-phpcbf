@@ -35,7 +35,11 @@ This extension has the following settings:
 * `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ] Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
 * `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
-* `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#coding-standards).
+* `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#coding-standards). Supports variable substitution:
+  * `${workspaceFolder}/phpcs.xml`
+  * `${workspaceRoot}/phpcs.xml` (deprecated alias for `${workspaceFolder}`)
+  * `~/standards/MyStandard`
+* `phpcbf.configSearch`: [ Optional | Default: `false` ]. When `true`, automatically searches the file's directory and parent directories (up to the workspace root) for a phpcs configuration file (`.phpcs.xml`, `phpcs.xml`, `phpcs.xml.dist`, etc.) and uses it as the coding standard. This is useful when different sub-projects within a workspace use different standards.
 
 
 The default settings are
@@ -46,7 +50,8 @@ The default settings are
     "phpcbf.executablePath": "phpcbf",
     "phpcbf.documentFormattingProvider": true,
     "phpcbf.onsave": false,
-    "phpcbf.standard": null
+    "phpcbf.standard": null,
+    "phpcbf.configSearch": false
 }
 ```
 
