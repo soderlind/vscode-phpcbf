@@ -62,14 +62,24 @@ class PHPCBF {
 
         this.standard = config.get("standard", null);
 
-        // Resolve ${workspaceFolder} / ${workspaceRoot} in the standard path.
-        if (this.standard && configUri) {
-            const folder = workspace.getWorkspaceFolder(configUri);
-            const rootPath = folder ? folder.uri.fsPath : null;
-            if (rootPath) {
-                this.standard = this.standard
-                    .replace("${workspaceFolder}", rootPath)
-                    .replace("${workspaceRoot}", rootPath);
+        // Resolve variable tokens and relative paths in the standard path.
+        if (this.standard) {
+            if (this.standard.startsWith("~")) {
+                this.standard = this.standard.replace(/^~\//, os.homedir() + "/");
+            }
+
+            if (configUri) {
+                const folder = workspace.getWorkspaceFolder(configUri);
+                const rootPath = folder ? folder.uri.fsPath : null;
+                if (rootPath) {
+                    this.standard = this.standard
+                        .replace("${workspaceFolder}", rootPath)
+                        .replace("${workspaceRoot}", rootPath);
+                    // Resolve relative paths (e.g. ./ruleset.xml) against the workspace root.
+                    if (this.standard.startsWith(".")) {
+                        this.standard = path.resolve(rootPath, this.standard);
+                    }
+                }
             }
         }
 
