@@ -149,9 +149,11 @@ class PHPCBF {
         fs.writeFileSync(fileName, text);
 
         let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
-        if (!this.debug) {
-            exec.stdin.end();
-        }
+        // Always close stdin — phpcbf processes a temp file passed as an argument
+        // and does not need stdin.  Leaving it open in debug mode caused phpcbf v2
+        // (and some v3 builds) to block waiting for input, which triggered the
+        // onWillSaveTextDocument timeout error reported in issue #35.
+        exec.stdin.end();
 
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
