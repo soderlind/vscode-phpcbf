@@ -16,7 +16,8 @@ const { findFiles } = require("./lib/utils");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
-    constructor() {
+    constructor(outputChannel) {
+        this.outputChannel = outputChannel;
         this.loadSettings();
     }
 
@@ -96,10 +97,8 @@ class PHPCBF {
             args.push("--standard=" + this.standard);
         }
         if (this.debug) {
-            console.group("PHPCBF");
-            console.log(
-                "PHPCBF args: " + this.executablePath + " " + args.join(" ")
-            );
+            this.outputChannel.appendLine("PHPCBF args: " + this.executablePath + " " + args.join(" "));
+            this.outputChannel.show(true);
         }
         return args;
     }
@@ -133,7 +132,7 @@ class PHPCBF {
         this.loadSettings(document.uri);
 
         if (this.debug) {
-            console.time("phpcbf");
+            this.outputChannel.appendLine("[" + new Date().toISOString() + "] Formatting: " + document.fileName);
         }
         let text = document.getText();
 
@@ -156,7 +155,8 @@ class PHPCBF {
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
                 reject();
-                console.log(err);
+                this.outputChannel.appendLine("PHPCBF error: " + err.message);
+                this.outputChannel.show(true);
                 if (err.code == "ENOENT") {
                     window.showErrorMessage(
                         "PHPCBF: " + err.message + ". executablePath not found."
@@ -170,6 +170,9 @@ class PHPCBF {
                 Exit code 2 is used to indicate that PHPCBF failed to fix some of the fixable errors it found
                 Exit code 3 is used for general script execution errors
                 */
+                if (this.debug) {
+                    this.outputChannel.appendLine("PHPCBF exit code: " + code);
+                }
                 switch (code) {
                     case 0:
                         break;
@@ -203,23 +206,22 @@ class PHPCBF {
 
         if (phpcbfError) {
             exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
+                this.outputChannel.appendLine("PHPCBF: " + buffer.toString());
+                this.outputChannel.show(true);
                 window.showErrorMessage(buffer.toString());
             });
         }
         if (this.debug) {
             exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
+                this.outputChannel.appendLine(buffer.toString());
             });
         }
         exec.stderr.on("data", buffer => {
-            console.log(buffer.toString());
+            this.outputChannel.appendLine("PHPCBF stderr: " + buffer.toString());
         });
         exec.on("close", code => {
-            // console.log(code);
             if (this.debug) {
-                console.timeEnd("phpcbf");
-                console.groupEnd();
+                this.outputChannel.appendLine("PHPCBF done (exit " + code + ")");
             }
         });
 
@@ -259,7 +261,10 @@ class PHPCBF {
 }
 
 exports.activate = context => {
-    let phpcbf = new PHPCBF();
+    const outputChannel = window.createOutputChannel("PHPCBF");
+    context.subscriptions.push(outputChannel);
+
+    let phpcbf = new PHPCBF(outputChannel);
 
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
