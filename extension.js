@@ -90,10 +90,10 @@ class PHPCBF {
         }
         args.push(tmpFileName);
 
-        this.standard = this.getStandard(document);
+        const standard = this.getStandard(document);
 
-        if (this.standard) {
-            args.push("--standard=" + this.standard);
+        if (standard) {
+            args.push("--standard=" + standard);
         }
         if (this.debug) {
             console.group("PHPCBF");
@@ -137,15 +137,16 @@ class PHPCBF {
         }
         let text = document.getText();
 
-        let phpcbfError = false;
-        let fileName =
-            TmpDir +
-            "/temp-" +
+        let stdoutOutput = "";
+        let fileName = path.join(
+            TmpDir,
+            "temp-" +
             Math.random()
             .toString(36)
             .replace(/[^a-z]+/g, "")
             .substr(0, 10) +
-            ".php";
+            ".php"
+        );
         fs.writeFileSync(fileName, text);
 
         let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
@@ -155,6 +156,7 @@ class PHPCBF {
 
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
+                fs.unlink(fileName, function() {});
                 reject();
                 console.log(err);
                 if (err.code == "ENOENT") {
@@ -172,9 +174,10 @@ class PHPCBF {
                 */
                 switch (code) {
                     case 0:
+                        reject();
                         break;
                     case 1:
-                    case 2:
+                    case 2: {
                         let fixed = fs.readFileSync(fileName, "utf-8");
                         if (fixed.length > 0) {
                             resolve(fixed);
@@ -182,36 +185,39 @@ class PHPCBF {
                             reject();
                         }
                         break;
+                    }
                     case 3:
-                        phpcbfError = true;
+                        window.showErrorMessage(
+                            stdoutOutput.trim()
+                                ? "PHPCBF: " + stdoutOutput.trim()
+                                : "PHPCBF: general script execution errors."
+                        );
+                        reject();
                         break;
-                    default:
-                        let msgs = {
-                            3: "PHPCBF: general script execution errors.",
+                    default: {
+                        const msgs = {
                             16: "PHPCBF: Configuration error of the application.",
                             32: "PHPCBF: Configuration error of a Fixer.",
                             64: "PHPCBF: Exception raised within the application."
                         };
-                        window.showErrorMessage(msgs[code]);
+                        window.showErrorMessage(
+                            msgs[code] || "PHPCBF: Unexpected exit code " + code + "."
+                        );
                         reject();
                         break;
+                    }
                 }
 
                 fs.unlink(fileName, function (err) {});
             });
         });
 
-        if (phpcbfError) {
-            exec.stdout.on("data", buffer => {
+        exec.stdout.on("data", buffer => {
+            stdoutOutput += buffer.toString();
+            if (this.debug) {
                 console.log(buffer.toString());
-                window.showErrorMessage(buffer.toString());
-            });
-        }
-        if (this.debug) {
-            exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
-            });
-        }
+            }
+        });
         exec.stderr.on("data", buffer => {
             console.log(buffer.toString());
         });
@@ -247,11 +253,9 @@ class PHPCBF {
                         prefix,
                         rootPath
                     );
-                    fs.exists(tmpExecutablePath, exists => {
-                        if (exists) {
-                            this.executablePath = tmpExecutablePath;
-                        }
-                    });
+                    if (fs.existsSync(tmpExecutablePath)) {
+                        this.executablePath = tmpExecutablePath;
+                    }
                 }
             }
         }
@@ -286,8 +290,10 @@ exports.activate = context => {
     );
 
     context.subscriptions.push(
-        workspace.onDidChangeConfiguration(() => {
-            phpcbf.loadSettings();
+        workspace.onDidChangeConfiguration(event => {
+            if (event.affectsConfiguration("phpcbf")) {
+                phpcbf.loadSettings();
+            }
         })
     );
 
