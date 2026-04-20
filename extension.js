@@ -247,11 +247,9 @@ class PHPCBF {
                         prefix,
                         rootPath
                     );
-                    fs.exists(tmpExecutablePath, exists => {
-                        if (exists) {
-                            this.executablePath = tmpExecutablePath;
-                        }
-                    });
+                    if (fs.existsSync(tmpExecutablePath)) {
+                        this.executablePath = tmpExecutablePath;
+                    }
                 }
             }
         }
