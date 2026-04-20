@@ -308,12 +308,16 @@ exports.activate = context => {
                                 if (text != originalText) {
                                     resolve([new vscode.TextEdit(range, text)]);
                                 } else {
-                                    reject();
+                                    // phpcbf ran but produced identical output — no edits needed.
+                                    resolve([]);
                                 }
                             })
-                            .catch(err => {
-                                console.log(err);
-                                reject();
+                            .catch(() => {
+                                // phpcbf had nothing to fix (exit 0) or encountered an error.
+                                // Error messages are surfaced via window.showErrorMessage()
+                                // inside format(); here we simply return no edits so VS Code
+                                // does not display a spurious "Formatter failed" notification.
+                                resolve([]);
                             });
                     });
                 }
