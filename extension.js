@@ -149,9 +149,7 @@ class PHPCBF {
         fs.writeFileSync(fileName, text);
 
         let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
-        if (!this.debug) {
-            exec.stdin.end();
-        }
+        exec.stdin.end();
 
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
