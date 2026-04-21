@@ -17,7 +17,14 @@ const TmpDir = os.tmpdir();
 
 class PHPCBF {
     constructor() {
+        // Cache configSearch results keyed by "workspaceRoot\0fileDir" to avoid
+        // repeated filesystem walks (fs.existsSync calls) on every format operation.
+        this._configCache = new Map();
         this.loadSettings();
+    }
+
+    clearConfigCache() {
+        this._configCache.clear();
     }
 
     loadSettings(uri) {
@@ -117,7 +124,18 @@ class PHPCBF {
             ];
 
             const fileDir = path.relative(workspaceRoot, path.dirname(filePath));
-            const confFile = findFiles(workspaceRoot, fileDir, confFileNames);
+
+            // Avoid repeated filesystem walks for the same directory.
+            // The cache maps "workspaceRoot\0fileDir" -> absolute config path (or null).
+            // It is cleared whenever phpcbf configuration changes.
+            const cacheKey = workspaceRoot + "\0" + fileDir;
+            let confFile;
+            if (this._configCache.has(cacheKey)) {
+                confFile = this._configCache.get(cacheKey);
+            } else {
+                confFile = findFiles(workspaceRoot, fileDir, confFileNames);
+                this._configCache.set(cacheKey, confFile);
+            }
 
             standard = confFile || this.standard;
         } else {
@@ -287,6 +305,7 @@ exports.activate = context => {
 
     context.subscriptions.push(
         workspace.onDidChangeConfiguration(() => {
+            phpcbf.clearConfigCache();
             phpcbf.loadSettings();
         })
     );
