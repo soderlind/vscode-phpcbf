@@ -103,4 +103,32 @@ describe("findFiles", () => {
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
     });
+
+    test("returns null for an empty names array without errors", () => {
+        mkDir("emptynames", "sub");
+        const result = findFiles(path.join(tmpRoot, "emptynames"), "sub", []);
+        assert.equal(result, null);
+    });
+
+    test("returns null when parent directory does not exist on disk", () => {
+        // A completely non-existent path — should not throw, just return null.
+        const result = findFiles(
+            path.join(tmpRoot, "nonexistent-parent"),
+            "deep" + path.sep + "sub",
+            "phpcs.xml"
+        );
+        assert.equal(result, null);
+    });
+
+    test("returns null when directory resolves outside parent boundary", () => {
+        // path.resolve(parent, absolutePath) returns absolutePath, which is
+        // outside parent — the walk should exhaust without a match.
+        mkDir("outside");
+        const result = findFiles(
+            path.join(tmpRoot, "outside"),
+            "/tmp",
+            "phpcs-does-not-exist-sentinel.xml"
+        );
+        assert.equal(result, null);
+    });
 });
