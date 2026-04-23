@@ -270,8 +270,19 @@ exports.activate = context => {
                 .getConfiguration("editor", event.document.uri)
                 .get("formatOnSave") === false
             ) {
+                const originalText = event.document.getText();
                 event.waitUntil(
-                    commands.executeCommand("editor.action.formatDocument")
+                    phpcbf.format(event.document).then(text => {
+                        if (text !== originalText) {
+                            const lastLine = event.document.lineAt(event.document.lineCount - 1);
+                            const range = new Range(
+                                new Position(0, 0),
+                                lastLine.range.end
+                            );
+                            return [new vscode.TextEdit(range, text)];
+                        }
+                        return [];
+                    }).catch(() => [])
                 );
             }
         })
