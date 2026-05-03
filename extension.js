@@ -17,7 +17,15 @@ const TmpDir = os.tmpdir();
 
 class PHPCBF {
     constructor() {
+        // Tracks the last workspace-folder key for which settings were loaded.
+        // Cleared whenever configuration changes so the next format reloads.
+        this._lastSettingsKey = null;
         this.loadSettings();
+    }
+
+    /** Invalidate the per-folder settings cache (call on config changes). */
+    clearSettingsCache() {
+        this._lastSettingsKey = null;
     }
 
     loadSettings(uri) {
@@ -25,6 +33,15 @@ class PHPCBF {
         // the active editor, or null (global settings) if neither is available.
         const configUri = uri ||
             (window.activeTextEditor ? window.activeTextEditor.document.uri : null);
+
+        // Derive a stable key from the workspace folder so that repeated saves
+        // within the same folder (the common case) skip redundant config reads.
+        const folder = configUri ? workspace.getWorkspaceFolder(configUri) : null;
+        const settingsKey = folder ? folder.uri.toString() : '';
+        if (settingsKey !== '' && settingsKey === this._lastSettingsKey) {
+            return;
+        }
+        this._lastSettingsKey = settingsKey;
 
         let config = workspace.getConfiguration("phpcbf", configUri);
         if (!config.get("enable") === true) {
@@ -287,6 +304,7 @@ exports.activate = context => {
 
     context.subscriptions.push(
         workspace.onDidChangeConfiguration(() => {
+            phpcbf.clearSettingsCache();
             phpcbf.loadSettings();
         })
     );
