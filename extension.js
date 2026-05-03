@@ -12,7 +12,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 const cp = require("child_process");
-const { findFiles } = require("./lib/utils");
+const { findFiles, resolveWorkspacePath } = require("./lib/utils");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
@@ -62,15 +62,11 @@ class PHPCBF {
 
         this.standard = config.get("standard", null);
 
-        // Resolve ${workspaceFolder} / ${workspaceRoot} in the standard path.
-        if (this.standard && configUri) {
-            const folder = workspace.getWorkspaceFolder(configUri);
+        // Resolve variables and relative paths in the standard path.
+        if (this.standard) {
+            const folder = configUri ? workspace.getWorkspaceFolder(configUri) : null;
             const rootPath = folder ? folder.uri.fsPath : null;
-            if (rootPath) {
-                this.standard = this.standard
-                    .replace("${workspaceFolder}", rootPath)
-                    .replace("${workspaceRoot}", rootPath);
-            }
+            this.standard = resolveWorkspacePath(this.standard, rootPath);
         }
 
         this.documentFormattingProvider = config.get(

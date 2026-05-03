@@ -10,7 +10,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 
-const { findFiles } = require("../lib/utils");
+const { findFiles, resolveWorkspacePath } = require("../lib/utils");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -102,5 +102,65 @@ describe("findFiles", () => {
         const expected = mkFile("single", "phpcs.xml");
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// resolveWorkspacePath
+// ---------------------------------------------------------------------------
+
+describe("resolveWorkspacePath", () => {
+    const root = path.join(os.tmpdir(), "phpcbf-resolve-test");
+
+    test("returns null/undefined as-is", () => {
+        assert.equal(resolveWorkspacePath(null, root), null);
+        assert.equal(resolveWorkspacePath(undefined, root), undefined);
+        assert.equal(resolveWorkspacePath("", root), "");
+    });
+
+    test("substitutes ${workspaceFolder}", () => {
+        const result = resolveWorkspacePath("${workspaceFolder}/phpcs.xml", root);
+        assert.equal(result, path.join(root, "phpcs.xml"));
+    });
+
+    test("substitutes ${workspaceRoot}", () => {
+        const result = resolveWorkspacePath("${workspaceRoot}/phpcs.xml", root);
+        assert.equal(result, path.join(root, "phpcs.xml"));
+    });
+
+    test("resolves relative path starting with ./", () => {
+        const result = resolveWorkspacePath("./ruleset.xml", root);
+        assert.equal(result, path.resolve(root, "ruleset.xml"));
+    });
+
+    test("resolves relative path without leading ./", () => {
+        const result = resolveWorkspacePath("vendor/standard/ruleset.xml", root);
+        assert.equal(result, path.resolve(root, "vendor/standard/ruleset.xml"));
+    });
+
+    test("leaves absolute path unchanged when rootPath supplied", () => {
+        const abs = path.join(os.tmpdir(), "absolute.xml");
+        const result = resolveWorkspacePath(abs, root);
+        assert.equal(result, abs);
+    });
+
+    test("expands ~ to home directory", () => {
+        const result = resolveWorkspacePath("~/.phpcs.xml", root);
+        assert.equal(result, path.join(os.homedir(), ".phpcs.xml"));
+    });
+
+    test("expands ~ alone to home directory", () => {
+        const result = resolveWorkspacePath("~", root);
+        assert.equal(result, os.homedir());
+    });
+
+    test("returns original path unchanged when rootPath is null", () => {
+        const result = resolveWorkspacePath("./relative.xml", null);
+        assert.equal(result, "./relative.xml");
+    });
+
+    test("substitutes ${workspaceFolder} inside a path segment", () => {
+        const result = resolveWorkspacePath("${workspaceFolder}/sub/ruleset.xml", root);
+        assert.equal(result, path.join(root, "sub", "ruleset.xml"));
     });
 });
