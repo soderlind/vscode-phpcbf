@@ -286,8 +286,10 @@ exports.activate = context => {
     );
 
     context.subscriptions.push(
-        workspace.onDidChangeConfiguration(() => {
-            phpcbf.loadSettings();
+        workspace.onDidChangeConfiguration(event => {
+            if (event.affectsConfiguration("phpcbf")) {
+                phpcbf.loadSettings();
+            }
         })
     );
 
