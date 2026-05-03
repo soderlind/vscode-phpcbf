@@ -12,7 +12,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 const cp = require("child_process");
-const { findFiles } = require("./lib/utils");
+const { findFiles, diffRegion } = require("./lib/utils");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
@@ -258,6 +258,30 @@ class PHPCBF {
     }
 }
 
+/**
+ * Compute a minimal TextEdit[] covering only the characters that actually
+ * changed between originalText and formattedText.  A full-document
+ * replacement causes VS Code to reset the cursor to position 0; using the
+ * smallest possible range keeps the cursor in place when the edit is outside
+ * the area where the user is working.
+ *
+ * @param {string} originalText  - The document text before formatting.
+ * @param {string} formattedText - The text returned by phpcbf.
+ * @param {vscode.TextDocument} document - The VS Code document (for positionAt).
+ * @returns {vscode.TextEdit[]}
+ */
+function minimalEdits(originalText, formattedText, document) {
+    const region = diffRegion(originalText, formattedText);
+    if (!region) {
+        return [];
+    }
+    const { start, origEnd, fmtEnd } = region;
+    const startPos = document.positionAt(start);
+    const endPos   = document.positionAt(origEnd);
+    const newText  = formattedText.slice(start, fmtEnd);
+    return [new vscode.TextEdit(new Range(startPos, endPos), newText)];
+}
+
 exports.activate = context => {
     let phpcbf = new PHPCBF();
 
@@ -306,7 +330,7 @@ exports.activate = context => {
                             .format(document)
                             .then(text => {
                                 if (text != originalText) {
-                                    resolve([new vscode.TextEdit(range, text)]);
+                                    resolve(minimalEdits(originalText, text, document));
                                 } else {
                                     reject();
                                 }
