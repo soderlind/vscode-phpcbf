@@ -33,7 +33,8 @@ This extension has the following settings:
   * `/usr/local/bin/phpcbf`
   * etc
 * `phpcbf.documentFormattingProvider`: [ Optional | Default: `true` ] Register PHP document formatting provider, right mouse-click context menu, select 'Format Document'
-* `phpcbf.onsave`: [ Optional | Default: `false` ]. Format on save. `"editor.formatOnSave": true` will override this setting.
+* `phpcbf.onsave`: [ Optional | Default: `false` ]. Format PHP files on save using a VS Code `onWillSaveTextDocument` listener. **Note**: this listener only fires when `"editor.formatOnSave"` is **not** set to `true`. If `"editor.formatOnSave": true` is enabled in the same scope, VS Code's built-in save formatter runs instead (via `documentFormattingProvider`).
+  > **Recommended**: For reliable format-on-save, use `"editor.formatOnSave": true` together with `"[php]": { "editor.defaultFormatter": "persoderlind.vscode-phpcbf" }` rather than `phpcbf.onsave`.
 * `phpcbf.debug`: [ Optional | Default: `false` ]. Write phpcbf stdout to the console.
 * `phpcbf.standard`: [ Optional | Default: `null` ]. The [coding standard](#coding-standards).
 
