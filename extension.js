@@ -17,6 +17,10 @@ const TmpDir = os.tmpdir();
 
 class PHPCBF {
     constructor() {
+        // Map from document URI string to stable temp file path.
+        // Re-using the same path per document avoids creating and deleting a new
+        // inode on every save — the file is overwritten in-place instead.
+        this._tmpFiles = new Map();
         this.loadSettings();
     }
 
@@ -138,14 +142,17 @@ class PHPCBF {
         let text = document.getText();
 
         let phpcbfError = false;
-        let fileName =
-            TmpDir +
-            "/temp-" +
-            Math.random()
-            .toString(36)
-            .replace(/[^a-z]+/g, "")
-            .substr(0, 10) +
-            ".php";
+        // Re-use a stable temp file path for this document so every save
+        // overwrites the same inode instead of creating and deleting a new one.
+        const docKey = document.uri.toString();
+        let fileName = this._tmpFiles.get(docKey);
+        if (!fileName) {
+            fileName = path.join(
+                TmpDir,
+                "phpcbf-" + process.pid + "-" + this._tmpFiles.size + ".php"
+            );
+            this._tmpFiles.set(docKey, fileName);
+        }
         fs.writeFileSync(fileName, text);
 
         let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
@@ -197,7 +204,8 @@ class PHPCBF {
                         break;
                 }
 
-                fs.unlink(fileName, function (err) {});
+                // Temp file is reused; deletion is deferred to document-close
+                // or extension deactivation — do not delete here.
             });
         });
 
@@ -291,6 +299,17 @@ exports.activate = context => {
         })
     );
 
+    // Clean up each document's stable temp file when the document is closed.
+    context.subscriptions.push(
+        workspace.onDidCloseTextDocument(doc => {
+            const tmpPath = phpcbf._tmpFiles.get(doc.uri.toString());
+            if (tmpPath) {
+                phpcbf._tmpFiles.delete(doc.uri.toString());
+                fs.unlink(tmpPath, () => {});
+            }
+        })
+    );
+
     if (phpcbf.documentFormattingProvider) {
         context.subscriptions.push(
             languages.registerDocumentFormattingEditProvider("php", {
@@ -319,5 +338,18 @@ exports.activate = context => {
                 }
             })
         );
+    }
+
+    // Store reference for deactivation cleanup.
+    exports._phpcbf = phpcbf;
+};
+
+exports.deactivate = () => {
+    const phpcbf = exports._phpcbf;
+    if (phpcbf) {
+        for (const tmpPath of phpcbf._tmpFiles.values()) {
+            try { fs.unlinkSync(tmpPath); } catch (_) {}
+        }
+        phpcbf._tmpFiles.clear();
     }
 };
