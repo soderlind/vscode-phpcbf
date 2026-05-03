@@ -185,16 +185,19 @@ class PHPCBF {
                     case 3:
                         phpcbfError = true;
                         break;
-                    default:
-                        let msgs = {
-                            3: "PHPCBF: general script execution errors.",
+                    default: {
+                        const msgs = {
                             16: "PHPCBF: Configuration error of the application.",
                             32: "PHPCBF: Configuration error of a Fixer.",
                             64: "PHPCBF: Exception raised within the application."
                         };
-                        window.showErrorMessage(msgs[code]);
+                        const msg = msgs[code];
+                        if (msg) {
+                            window.showErrorMessage(msg);
+                        }
                         reject();
                         break;
+                    }
                 }
 
                 fs.unlink(fileName, function (err) {});
