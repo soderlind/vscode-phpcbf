@@ -2,7 +2,7 @@
 
 This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for Visual Studio Code.
 
-`phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a [coding standard](#coding-standards).
+`phpcbf` is the lesser known sibling of `phpcs` ([PHP_CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer)). `phpcbf` will try to fix and beautify your code according to a [coding standard](#coding-standards).
 
 ## Preview
 
@@ -12,7 +12,7 @@ This extension provides the PHP Code Beautifier and Fixer (`phpcbf`) command for
 
 ## Requirements
 
-phpcbf must be installed. phpcbf is installed when you [install phpcs](https://github.com/squizlabs/PHP_CodeSniffer#installation).
+phpcbf must be installed. phpcbf is installed when you [install phpcs](https://github.com/PHPCSStandards/PHP_CodeSniffer#installation).
 
 > I recommend phpcs version 3.2.2 or later.
 
@@ -68,7 +68,7 @@ If you add a standard to phpcs, it will be available for phpcbf. Some popular st
 
 ### Rules file
 
-You can also point to a [phpcs.xml rules file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
+You can also point to a [phpcs.xml rules file](https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Annotated-Ruleset), eg: `"phpcbf.standard": "/file/path/phpcs.xml"`
 
 
 ## Known Issues
