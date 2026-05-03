@@ -135,10 +135,9 @@ class PHPCBF {
         if (this.debug) {
             console.time("phpcbf");
         }
-        let text = document.getText();
+        const text = document.getText();
 
-        let phpcbfError = false;
-        let fileName =
+        const fileName =
             TmpDir +
             "/temp-" +
             Math.random()
@@ -146,84 +145,87 @@ class PHPCBF {
             .replace(/[^a-z]+/g, "")
             .substr(0, 10) +
             ".php";
-        fs.writeFileSync(fileName, text);
 
-        let exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
-        if (!this.debug) {
-            exec.stdin.end();
-        }
-
-        let promise = new Promise((resolve, reject) => {
-            exec.on("error", err => {
-                reject();
-                console.log(err);
-                if (err.code == "ENOENT") {
-                    window.showErrorMessage(
-                        "PHPCBF: " + err.message + ". executablePath not found."
-                    );
+        // Use async file I/O to avoid blocking the extension host thread,
+        // which is especially noticeable with large PHP files.
+        return new Promise((resolve, reject) => {
+            fs.writeFile(fileName, text, writeErr => {
+                if (writeErr) {
+                    reject();
+                    return;
                 }
-            });
-            exec.on("exit", code => {
-                /*  phpcbf exit codes:
-                Exit code 0 is used to indicate that no fixable errors were found, so nothing was fixed
-                Exit code 1 is used to indicate that all fixable errors were fixed correctly
-                Exit code 2 is used to indicate that PHPCBF failed to fix some of the fixable errors it found
-                Exit code 3 is used for general script execution errors
-                */
-                switch (code) {
-                    case 0:
-                        break;
-                    case 1:
-                    case 2:
-                        let fixed = fs.readFileSync(fileName, "utf-8");
-                        if (fixed.length > 0) {
-                            resolve(fixed);
-                        } else {
+
+                const exec = cp.spawn(this.executablePath, this.getArgs(document, fileName));
+                if (!this.debug) {
+                    exec.stdin.end();
+                }
+
+                exec.on("error", err => {
+                    reject();
+                    console.log(err);
+                    if (err.code == "ENOENT") {
+                        window.showErrorMessage(
+                            "PHPCBF: " + err.message + ". executablePath not found."
+                        );
+                    }
+                });
+
+                exec.on("exit", code => {
+                    /*  phpcbf exit codes:
+                    Exit code 0 is used to indicate that no fixable errors were found, so nothing was fixed
+                    Exit code 1 is used to indicate that all fixable errors were fixed correctly
+                    Exit code 2 is used to indicate that PHPCBF failed to fix some of the fixable errors it found
+                    Exit code 3 is used for general script execution errors
+                    */
+                    switch (code) {
+                        case 0:
+                            break;
+                        case 1:
+                        case 2:
+                            // Async read to avoid blocking the extension host thread.
+                            fs.readFile(fileName, "utf-8", (readErr, fixed) => {
+                                fs.unlink(fileName, () => {});
+                                if (!readErr && fixed && fixed.length > 0) {
+                                    resolve(fixed);
+                                } else {
+                                    reject();
+                                }
+                            });
+                            return; // unlink handled inside readFile callback
+                        case 3:
+                            window.showErrorMessage("PHPCBF: general script execution errors.");
+                            break;
+                        default: {
+                            const msgs = {
+                                16: "PHPCBF: Configuration error of the application.",
+                                32: "PHPCBF: Configuration error of a Fixer.",
+                                64: "PHPCBF: Exception raised within the application."
+                            };
+                            window.showErrorMessage(msgs[code]);
                             reject();
+                            break;
                         }
-                        break;
-                    case 3:
-                        phpcbfError = true;
-                        break;
-                    default:
-                        let msgs = {
-                            3: "PHPCBF: general script execution errors.",
-                            16: "PHPCBF: Configuration error of the application.",
-                            32: "PHPCBF: Configuration error of a Fixer.",
-                            64: "PHPCBF: Exception raised within the application."
-                        };
-                        window.showErrorMessage(msgs[code]);
-                        reject();
-                        break;
+                    }
+
+                    fs.unlink(fileName, () => {});
+                });
+
+                if (this.debug) {
+                    exec.stdout.on("data", buffer => {
+                        console.log(buffer.toString());
+                    });
                 }
-
-                fs.unlink(fileName, function (err) {});
+                exec.stderr.on("data", buffer => {
+                    console.log(buffer.toString());
+                });
+                exec.on("close", () => {
+                    if (this.debug) {
+                        console.timeEnd("phpcbf");
+                        console.groupEnd();
+                    }
+                });
             });
         });
-
-        if (phpcbfError) {
-            exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
-                window.showErrorMessage(buffer.toString());
-            });
-        }
-        if (this.debug) {
-            exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
-            });
-        }
-        exec.stderr.on("data", buffer => {
-            console.log(buffer.toString());
-        });
-        exec.on("close", code => {
-            // console.log(code);
-            if (this.debug) {
-                console.timeEnd("phpcbf");
-                console.groupEnd();
-            }
-        });
-
-        return promise;
     }
 
     addRootPath(prefix) {
