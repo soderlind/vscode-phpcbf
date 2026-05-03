@@ -263,9 +263,14 @@ exports.activate = context => {
 
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
+            // Read phpcbf.onsave scoped to this document's URI so that
+            // per-folder settings in multi-root workspaces are respected.
+            const onsave = workspace
+                .getConfiguration("phpcbf", event.document.uri)
+                .get("onsave", false);
             if (
                 event.document.languageId == "php" &&
-                phpcbf.onsave &&
+                onsave &&
                 workspace
                 .getConfiguration("editor", event.document.uri)
                 .get("formatOnSave") === false
