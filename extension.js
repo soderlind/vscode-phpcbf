@@ -27,7 +27,12 @@ class PHPCBF {
             (window.activeTextEditor ? window.activeTextEditor.document.uri : null);
 
         let config = workspace.getConfiguration("phpcbf", configUri);
-        if (!config.get("enable") === true) {
+        // Always read the enable flag first so format() can check it even when
+        // disabled. The original `!config.get("enable") === true` check returned
+        // early without storing the value, leaving stale settings in place and
+        // allowing phpcbf to run despite being disabled.
+        this.enable = config.get("enable", true);
+        if (!this.enable) {
             return;
         }
         this.onsave = config.get("onsave", false);
@@ -131,6 +136,11 @@ class PHPCBF {
         // Reload settings scoped to this document so multi-root workspaces and
         // per-folder settings are respected on every format call.
         this.loadSettings(document.uri);
+
+        // Respect phpcbf.enable = false: return an empty edit list immediately.
+        if (!this.enable) {
+            return Promise.resolve([]);
+        }
 
         if (this.debug) {
             console.time("phpcbf");
