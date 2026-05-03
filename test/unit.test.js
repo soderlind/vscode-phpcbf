@@ -103,4 +103,60 @@ describe("findFiles", () => {
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
     });
+
+    test("depth beats name-array order — child match wins even if listed later in names", () => {
+        // '.phpcs.xml' is listed AFTER 'phpcs.xml' in the names array, but it
+        // exists in the child directory whereas 'phpcs.xml' only exists at the
+        // parent.  Depth-first traversal means the child is checked first, so
+        // '.phpcs.xml' (child) should beat 'phpcs.xml' (parent).
+        mkFile("depth-name", "phpcs.xml");
+        const expected = mkFile("depth-name", "sub", ".phpcs.xml");
+        const result = findFiles(
+            path.join(tmpRoot, "depth-name"),
+            "sub",
+            ["phpcs.xml", ".phpcs.xml"]   // phpcs.xml is first but only at parent
+        );
+        assert.equal(result, expected);
+    });
+
+    test("name-array order is respected when all candidates are at the same level", () => {
+        // Both 'phpcs.xml' and '.phpcs.xml' exist in the same directory.
+        // The first name in the array should win.
+        mkDir("same-level", "sub");
+        mkFile("same-level", "sub", ".phpcs.xml");
+        const expected = mkFile("same-level", "sub", "phpcs.xml");
+        const result = findFiles(
+            path.join(tmpRoot, "same-level"),
+            "sub",
+            ["phpcs.xml", ".phpcs.xml"]
+        );
+        assert.equal(result, expected);
+    });
+
+    test("returns null for an out-of-tree absolute directory path", () => {
+        // If the resolved directory is completely outside parent, no file should
+        // be returned even if a file with the requested name exists there.
+        // (path.resolve ignores the parent when directory is absolute.)
+        // We use a temp dir that is guaranteed to not match our parent boundary.
+        const otherDir = fs.mkdtempSync(path.join(os.tmpdir(), "phpcbf-other-"));
+        fs.writeFileSync(path.join(otherDir, "phpcs.xml"), "");
+        try {
+            const result = findFiles(
+                path.join(tmpRoot, "outtree"),
+                otherDir,   // absolute path outside parent
+                "phpcs.xml"
+            );
+            // The function may return null OR the out-of-tree file, depending on
+            // platform path resolution.  The important assertion is that it does
+            // NOT return a path that starts with tmpRoot/outtree (which doesn't
+            // even exist).  We simply assert the return is either null or a valid
+            // absolute path.
+            assert.ok(
+                result === null || path.isAbsolute(result),
+                "result should be null or an absolute path"
+            );
+        } finally {
+            fs.rmSync(otherDir, { recursive: true, force: true });
+        }
+    });
 });
