@@ -15,6 +15,16 @@ const cp = require("child_process");
 const { findFiles } = require("./lib/utils");
 const TmpDir = os.tmpdir();
 
+/** Config file names searched (in priority order) when `phpcbf.configSearch` is enabled. */
+const PHPCS_CONFIG_FILE_NAMES = [
+    ".phpcs.xml",
+    ".phpcs.xml.dist",
+    "phpcs.xml",
+    "phpcs.xml.dist",
+    "phpcs.ruleset.xml",
+    "ruleset.xml",
+];
+
 class PHPCBF {
     constructor() {
         this.loadSettings();
@@ -111,13 +121,8 @@ class PHPCBF {
         const workspaceRoot = folder ? folder.uri.fsPath : null;
         const filePath = document.fileName;
         if (this.configSearch && workspaceRoot !== null && filePath !== undefined) {
-            const confFileNames = [
-                '.phpcs.xml', '.phpcs.xml.dist', 'phpcs.xml', 'phpcs.xml.dist',
-                'phpcs.ruleset.xml', 'ruleset.xml',
-            ];
-
             const fileDir = path.relative(workspaceRoot, path.dirname(filePath));
-            const confFile = findFiles(workspaceRoot, fileDir, confFileNames);
+            const confFile = findFiles(workspaceRoot, fileDir, PHPCS_CONFIG_FILE_NAMES);
 
             standard = confFile || this.standard;
         } else {
