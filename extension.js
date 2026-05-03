@@ -45,13 +45,13 @@ class PHPCBF {
 
         // ${workspaceRoot} is deprecated
         if (this.executablePath.startsWith("${workspaceRoot}")) {
-            this.addRootPath("${workspaceRoot}");
+            this.addRootPath("${workspaceRoot}", configUri);
         }
         if (this.executablePath.startsWith("${workspaceFolder}")) {
-            this.addRootPath("${workspaceFolder}");
+            this.addRootPath("${workspaceFolder}", configUri);
         }
         if (this.executablePath.startsWith(".")) {
-            this.addRootPath(".");
+            this.addRootPath(".", configUri);
         }
         if (this.executablePath.startsWith("~")) {
             this.executablePath = this.executablePath.replace(
@@ -226,16 +226,23 @@ class PHPCBF {
         return promise;
     }
 
-    addRootPath(prefix) {
-        const resources = [];
-        if (workspace.workspaceFolders) {
+    addRootPath(prefix, configUri) {
+        // Determine the workspace folder for the document being formatted.
+        // When configUri is provided, use that folder (correct for multi-root
+        // workspaces where each folder may have its own per-folder executablePath).
+        // Fall back to iterating all workspace folders when no URI is available
+        // (e.g. at extension activation before any document is formatted).
+        let resources = [];
+        if (configUri) {
+            resources = [configUri];
+        } else if (workspace.workspaceFolders) {
             for (let wsFolder of workspace.workspaceFolders) {
                 resources.push(wsFolder.uri);
             }
         } else {
             const editor = window.activeTextEditor;
             if (editor) {
-                resources.push(editor.document.uri);
+                resources = [editor.document.uri];
             }
         }
         for (let resource of resources) {
@@ -247,11 +254,9 @@ class PHPCBF {
                         prefix,
                         rootPath
                     );
-                    fs.exists(tmpExecutablePath, exists => {
-                        if (exists) {
-                            this.executablePath = tmpExecutablePath;
-                        }
-                    });
+                    if (fs.existsSync(tmpExecutablePath)) {
+                        this.executablePath = tmpExecutablePath;
+                    }
                 }
             }
         }
