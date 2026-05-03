@@ -10,7 +10,7 @@ const path = require("path");
 const fs = require("fs");
 const os = require("os");
 
-const { findFiles } = require("../lib/utils");
+const { findFiles, expandHomedir, resolveVars } = require("../lib/utils");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -102,5 +102,85 @@ describe("findFiles", () => {
         const expected = mkFile("single", "phpcs.xml");
         const result = findFiles(path.join(tmpRoot, "single"), ".", "phpcs.xml");
         assert.equal(result, expected);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// expandHomedir
+// ---------------------------------------------------------------------------
+
+describe("expandHomedir", () => {
+    test("expands leading ~/ to the home directory", () => {
+        const result = expandHomedir("~/projects/myapp");
+        assert.equal(result, path.join(os.homedir(), "projects/myapp"));
+    });
+
+    test("expands bare ~ followed by path separator", () => {
+        const result = expandHomedir("~/.config/phpcs.xml");
+        assert.equal(result, os.homedir() + "/.config/phpcs.xml");
+    });
+
+    test("does not change an absolute path", () => {
+        assert.equal(expandHomedir("/absolute/path"), "/absolute/path");
+    });
+
+    test("does not change a relative path", () => {
+        assert.equal(expandHomedir("relative/path"), "relative/path");
+    });
+
+    test("does not change an empty string", () => {
+        assert.equal(expandHomedir(""), "");
+    });
+
+    test("does not change a path that starts with ~name (no slash)", () => {
+        // '~username' style paths are not POSIX homedir shorthand in Node;
+        // only '~/' is expanded.
+        assert.equal(expandHomedir("~user/foo"), "~user/foo");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// resolveVars
+// ---------------------------------------------------------------------------
+
+describe("resolveVars", () => {
+    const ROOT = "/workspace/myproject";
+
+    test("replaces ${workspaceFolder} with rootPath", () => {
+        assert.equal(
+            resolveVars("${workspaceFolder}/ruleset.xml", ROOT),
+            ROOT + "/ruleset.xml"
+        );
+    });
+
+    test("replaces ${workspaceRoot} with rootPath", () => {
+        assert.equal(
+            resolveVars("${workspaceRoot}/ruleset.xml", ROOT),
+            ROOT + "/ruleset.xml"
+        );
+    });
+
+    test("replaces both tokens when both appear", () => {
+        const result = resolveVars(
+            "${workspaceFolder}/a/${workspaceRoot}/b",
+            ROOT
+        );
+        // String.replace replaces the first occurrence of each token.
+        assert.equal(result, ROOT + "/a/" + ROOT + "/b");
+    });
+
+    test("leaves a plain standard name unchanged", () => {
+        assert.equal(resolveVars("WordPress", ROOT), "WordPress");
+    });
+
+    test("leaves an absolute path unchanged", () => {
+        assert.equal(
+            resolveVars("/etc/phpcs/ruleset.xml", ROOT),
+            "/etc/phpcs/ruleset.xml"
+        );
+    });
+
+    test("handles an empty string", () => {
+        assert.equal(resolveVars("", ROOT), "");
     });
 });
