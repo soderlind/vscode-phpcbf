@@ -16,8 +16,17 @@ const { findFiles } = require("./lib/utils");
 const TmpDir = os.tmpdir();
 
 class PHPCBF {
-    constructor() {
+    constructor(outputChannel) {
+        this.outputChannel = outputChannel;
         this.loadSettings();
+    }
+
+    _debugLog(message) {
+        if (this.outputChannel) {
+            this.outputChannel.appendLine(message);
+        } else {
+            console.log(message);
+        }
     }
 
     loadSettings(uri) {
@@ -96,10 +105,7 @@ class PHPCBF {
             args.push("--standard=" + this.standard);
         }
         if (this.debug) {
-            console.group("PHPCBF");
-            console.log(
-                "PHPCBF args: " + this.executablePath + " " + args.join(" ")
-            );
+            this._debugLog("PHPCBF args: " + this.executablePath + " " + args.join(" "));
         }
         return args;
     }
@@ -133,11 +139,10 @@ class PHPCBF {
         this.loadSettings(document.uri);
 
         if (this.debug) {
-            console.time("phpcbf");
+            this._debugStart = Date.now();
         }
         let text = document.getText();
 
-        let phpcbfError = false;
         let fileName =
             TmpDir +
             "/temp-" +
@@ -156,7 +161,7 @@ class PHPCBF {
         let promise = new Promise((resolve, reject) => {
             exec.on("error", err => {
                 reject();
-                console.log(err);
+                this._debugLog("PHPCBF spawn error: " + err.message);
                 if (err.code == "ENOENT") {
                     window.showErrorMessage(
                         "PHPCBF: " + err.message + ". executablePath not found."
@@ -183,7 +188,9 @@ class PHPCBF {
                         }
                         break;
                     case 3:
-                        phpcbfError = true;
+                        // General phpcbf execution error — reject so the Promise settles.
+                        window.showErrorMessage("PHPCBF: general script execution errors.");
+                        reject();
                         break;
                     default:
                         let msgs = {
@@ -201,25 +208,17 @@ class PHPCBF {
             });
         });
 
-        if (phpcbfError) {
-            exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
-                window.showErrorMessage(buffer.toString());
-            });
-        }
         if (this.debug) {
             exec.stdout.on("data", buffer => {
-                console.log(buffer.toString());
+                this._debugLog(buffer.toString());
             });
         }
         exec.stderr.on("data", buffer => {
-            console.log(buffer.toString());
+            this._debugLog(buffer.toString());
         });
         exec.on("close", code => {
-            // console.log(code);
             if (this.debug) {
-                console.timeEnd("phpcbf");
-                console.groupEnd();
+                this._debugLog("phpcbf done (" + (Date.now() - (this._debugStart || Date.now())) + "ms)");
             }
         });
 
@@ -259,7 +258,9 @@ class PHPCBF {
 }
 
 exports.activate = context => {
-    let phpcbf = new PHPCBF();
+    const outputChannel = vscode.window.createOutputChannel("phpcbf");
+    context.subscriptions.push(outputChannel);
+    let phpcbf = new PHPCBF(outputChannel);
 
     context.subscriptions.push(
         workspace.onWillSaveTextDocument(event => {
@@ -312,7 +313,6 @@ exports.activate = context => {
                                 }
                             })
                             .catch(err => {
-                                console.log(err);
                                 reject();
                             });
                     });
